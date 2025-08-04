@@ -1,33 +1,55 @@
-# Getting Started with Create React App
+# R3F 메타버스 웹 애플리케이션
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React Three Fiber를 사용한 3D 메타버스 웹 애플리케이션입니다.
 
-## Available Scripts
+## 기능
 
-In the project directory, you can run:
+- **1인칭 시점**: 마우스로 시점 조작 가능
+- **WASD 이동**: 키보드로 자유로운 이동
+- **점프**: 스페이스바로 점프
+- **물리 엔진**: Cannon.js를 사용한 리얼한 물리 시뮬레이션
+- **3D 환경**: 건물, 나무, 박스 등 다양한 3D 객체들
 
-### `npm start`
+## 조작법
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- `W` - 앞으로 이동
+- `S` - 뒤로 이동  
+- `A` - 왼쪽으로 이동
+- `D` - 오른쪽으로 이동
+- `Space` - 점프
+- `마우스` - 시점 조작 (화면 클릭 후 마우스 락 활성화)
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## 설치 및 실행
 
-### `npm test`
+```bash
+# 의존성 설치
+npm install
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+# 개발 서버 시작
+npm start
+```
 
-### `npm run build`
+## 사용된 라이브러리
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **React Three Fiber** - React에서 Three.js 사용
+- **React Three Drei** - R3F용 유용한 헬퍼 컴포넌트들
+- **React Three Cannon** - 물리 엔진 (Cannon.js)
+- **Three.js** - 3D 그래픽 라이브러리
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 프로젝트 구조
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+src/
+├── components/
+│   ├── Scene.tsx              # 메인 3D 씬
+│   ├── FirstPersonPlayer.tsx  # 1인칭 플레이어 컨트롤러
+│   ├── Ground.tsx            # 바닥
+│   ├── Box.tsx              # 박스 객체
+│   ├── Building.tsx         # 건물 객체
+│   └── Tree.tsx             # 나무 객체
+├── App.tsx                   # 메인 App 컴포넌트
+└── index.tsx                 # 엔트리 포인트
+```
 
 ### `npm run eject`
 
@@ -44,3 +66,4 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+# Climation

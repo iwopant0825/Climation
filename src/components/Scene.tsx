@@ -247,7 +247,7 @@ export function Scene() {
             Climate Crisis Metaverse
           </div>
           <div style={{ opacity: 0.8 }}>
-            Ver 1.0 | 2024
+            Ver 1.0 | 2025
           </div>
         </div>
       )}

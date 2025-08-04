@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { Html } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
@@ -16,6 +16,29 @@ export function ClimatePin({ position, title, description, detailedInfo, color, 
   const pinRef = useRef<THREE.Group>(null)
   const [hovered, setHovered] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
+
+  useEffect(() => {
+    // 기기 타입 감지
+    const checkDeviceType = () => {
+      const width = window.innerWidth
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      const isTouchDevice = 'ontouchstart' in window
+      
+      setIsMobile((isMobileDevice || isTouchDevice) && width <= 768)
+      setIsTablet((isMobileDevice || isTouchDevice) && width > 768 && width <= 1024)
+    }
+
+    checkDeviceType()
+    window.addEventListener('resize', checkDeviceType)
+    window.addEventListener('orientationchange', checkDeviceType)
+
+    return () => {
+      window.removeEventListener('resize', checkDeviceType)
+      window.removeEventListener('orientationchange', checkDeviceType)
+    }
+  }, [])
 
   // 카메라와의 각도를 계산해서 지구 뒤쪽에 있으면 가리기
   useFrame(({ camera }) => {
@@ -46,11 +69,23 @@ export function ClimatePin({ position, title, description, detailedInfo, color, 
       onClick={handleClick}
       onPointerOver={(e) => {
         e.stopPropagation()
-        setHovered(true)
+        // 데스크톱에서만 호버 활성화
+        if (!isMobile && !isTablet) {
+          setHovered(true)
+        }
       }}
       onPointerOut={(e) => {
         e.stopPropagation()
-        setHovered(false)
+        if (!isMobile && !isTablet) {
+          setHovered(false)
+        }
+      }}
+      onPointerDown={(e) => {
+        e.stopPropagation()
+        // 모바일/태블릿에서는 터치로 호버 상태 토글
+        if (isMobile || isTablet) {
+          setHovered(!hovered)
+        }
       }}
     >
       {/* 핀 본체 */}
@@ -83,7 +118,7 @@ export function ClimatePin({ position, title, description, detailedInfo, color, 
           sprite
           style={{
             pointerEvents: 'none',
-            transform: 'scale(0.7)',
+            transform: isMobile ? 'scale(0.6)' : isTablet ? 'scale(0.65)' : 'scale(0.7)',
             opacity: isVisible ? 1 : 0,
             transition: 'opacity 0.3s ease',
           }}
@@ -91,9 +126,9 @@ export function ClimatePin({ position, title, description, detailedInfo, color, 
           <div style={{
             background: 'rgba(0, 0, 0, 0.8)',
             color: 'white',
-            padding: '4px 8px',
+            padding: isMobile ? '3px 6px' : '4px 8px',
             borderRadius: '4px',
-            fontSize: '12px',
+            fontSize: isMobile ? '10px' : isTablet ? '11px' : '12px',
             whiteSpace: 'nowrap',
             backdropFilter: 'blur(5px)',
             border: `1px solid ${color}`,
@@ -113,17 +148,18 @@ export function ClimatePin({ position, title, description, detailedInfo, color, 
           zIndexRange={[1000, 2000]}
           style={{
             pointerEvents: 'none',
-            transform: 'scale(1)',
+            transform: isMobile ? 'scale(0.7)' : isTablet ? 'scale(0.85)' : 'scale(1)',
             zIndex: 9999,
           }}
         >
           <div style={{
             background: 'rgba(0, 0, 0, 0.95)',
             color: 'white',
-            padding: '16px',
+            padding: isMobile ? '12px' : isTablet ? '14px' : '16px',
             borderRadius: '12px',
-            fontSize: '14px',
-            width: '280px',
+            fontSize: isMobile ? '12px' : isTablet ? '13px' : '14px',
+            width: isMobile ? '250px' : isTablet ? '260px' : '280px',
+            maxWidth: isMobile ? '85vw' : isTablet ? '80vw' : '280px',
             backdropFilter: 'blur(15px)',
             border: `2px solid ${color}`,
             boxShadow: `0 0 30px ${color}40, inset 0 0 20px rgba(255,255,255,0.1)`,
@@ -132,18 +168,19 @@ export function ClimatePin({ position, title, description, detailedInfo, color, 
             whiteSpace: 'normal',
             position: 'relative',
             zIndex: 9999,
+            boxSizing: 'border-box',
           }}>
             <div style={{ 
               fontWeight: 'bold', 
               marginBottom: '8px', 
-              fontSize: '16px',
+              fontSize: isMobile ? '14px' : isTablet ? '15px' : '16px',
               color: color,
               textShadow: `0 0 10px ${color}50`
             }}>
               {title}
             </div>
             <div style={{ 
-              fontSize: '13px', 
+              fontSize: isMobile ? '11px' : isTablet ? '12px' : '13px', 
               opacity: 0.9, 
               marginBottom: '12px',
               lineHeight: '1.4'
@@ -151,7 +188,7 @@ export function ClimatePin({ position, title, description, detailedInfo, color, 
               {description}
             </div>
             <div style={{ 
-              fontSize: '12px', 
+              fontSize: isMobile ? '10px' : isTablet ? '11px' : '12px', 
               opacity: 0.8,
               lineHeight: '1.5',
               marginBottom: '10px',
@@ -161,12 +198,12 @@ export function ClimatePin({ position, title, description, detailedInfo, color, 
               {detailedInfo}
             </div>
             <div style={{ 
-              fontSize: '10px', 
+              fontSize: isMobile ? '9px' : isTablet ? '10px' : '10px', 
               opacity: 0.6,
               textAlign: 'center',
               fontStyle: 'italic'
             }}>
-              클릭하여 메타버스 탐험하기
+              {isMobile || isTablet ? '터치하여 탐험하기' : '클릭하여 메타버스 탐험하기'}
             </div>
           </div>
         </Html>

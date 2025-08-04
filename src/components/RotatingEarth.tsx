@@ -12,25 +12,45 @@ interface RotatingEarthProps {
 const RotatingEarth: React.FC<RotatingEarthProps> = ({ onAsphaltCrisis, onOtherCrisis }) => {
   const groupRef = useRef<THREE.Group>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
   
   useEffect(() => {
-    // 모바일 기기 감지
-    const checkIsMobile = () => {
+    // 디바이스 타입 감지
+    const checkDeviceType = () => {
+      const width = window.innerWidth;
       const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       const isTouchDevice = 'ontouchstart' in window;
-      const isSmallScreen = window.innerWidth <= 768;
-      setIsMobile(isMobileDevice || isTouchDevice || isSmallScreen);
+      
+      setIsMobile((isMobileDevice || isTouchDevice) && width <= 768);
+      setIsTablet((isMobileDevice || isTouchDevice) && width > 768 && width <= 1024);
     }
     
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
+    checkDeviceType();
+    window.addEventListener('resize', checkDeviceType);
+    window.addEventListener('orientationchange', checkDeviceType);
+    
+    return () => {
+      window.removeEventListener('resize', checkDeviceType);
+      window.removeEventListener('orientationchange', checkDeviceType);
+    }
   }, []);
   
   useFrame((state, delta) => {
     if (groupRef.current) {
-      // 모바일에서는 회전 속도 조절 (배터리 최적화, 과열 방지)
-      const rotationSpeed = isMobile ? 0.05 : 0.1;
+      // 디바이스 유형에 따른 회전 속도 조정
+      let rotationSpeed;
+      
+      if (isMobile) {
+        // 모바일 - 배터리 최적화, 과열 방지를 위해 느린 속도
+        rotationSpeed = 0.05;
+      } else if (isTablet) {
+        // 태블릿 - 중간 속도
+        rotationSpeed = 0.075;
+      } else {
+        // 데스크톱 - 기본 속도
+        rotationSpeed = 0.1;
+      }
+      
       groupRef.current.rotation.y += delta * rotationSpeed;
     }
   });

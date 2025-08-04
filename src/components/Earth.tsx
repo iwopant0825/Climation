@@ -5,52 +5,95 @@ import * as THREE from 'three'
 export function Earth() {
   const earthRef = useRef<THREE.Group>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
   
-  // 모바일에서는 낮은 품질의 모델 로드(GLB 자체가 최적화되었다고 가정)
+  // 디바이스별 모델 최적화를 위한 설정
   const { scene } = useGLTF('/Models/Earth/earth.glb')
   
   useEffect(() => {
-    // 모바일 기기 감지
-    const checkIsMobile = () => {
+    // 디바이스 타입 감지
+    const checkDeviceType = () => {
+      const width = window.innerWidth
       const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
       const isTouchDevice = 'ontouchstart' in window
-      const isSmallScreen = window.innerWidth <= 768
-      setIsMobile(isMobileDevice || isTouchDevice || isSmallScreen)
+      
+      setIsMobile((isMobileDevice || isTouchDevice) && width <= 768)
+      setIsTablet((isMobileDevice || isTouchDevice) && width > 768 && width <= 1024)
     }
     
-    checkIsMobile()
-    window.addEventListener('resize', checkIsMobile)
+    checkDeviceType()
+    window.addEventListener('resize', checkDeviceType)
+    window.addEventListener('orientationchange', checkDeviceType)
     
-    // 모바일 최적화 - 모델 품질 감소
+    // 디바이스별 모델 품질 최적화
     if (scene) {
       scene.traverse((object) => {
         if ((object as THREE.Mesh).isMesh) {
           const mesh = object as THREE.Mesh
-          if (isMobile && mesh.material) {
-            // 모바일에서 낮은 품질
+          
+          // 모바일과 태블릿에 따른 최적화 수준 조정
+          if (mesh.material) {
             if (Array.isArray(mesh.material)) {
               mesh.material.forEach(mat => {
                 if (mat instanceof THREE.MeshStandardMaterial) {
-                  mat.roughness = 0.8; // 러프니스 증가 (계산 단순화)
-                  mat.metalness = 0.2; // 메탈 감소 (계산 단순화)
-                  mat.envMapIntensity = 0.5; // 환경 맵 강도 감소
+                  if (isMobile) {
+                    // 모바일 - 가장 낮은 품질
+                    mat.roughness = 0.9
+                    mat.metalness = 0.1
+                    mat.envMapIntensity = 0.3
+                    mat.flatShading = true // 플랫 셰이딩으로 렌더링 단순화
+                    if (mat.map) mat.map.minFilter = THREE.NearestFilter // 텍스처 필터링 단순화
+                  } else if (isTablet) {
+                    // 태블릿 - 중간 품질
+                    mat.roughness = 0.7
+                    mat.metalness = 0.3
+                    mat.envMapIntensity = 0.5
+                  } else {
+                    // 데스크톱 - 높은 품질
+                    mat.roughness = 0.5
+                    mat.metalness = 0.5
+                    mat.envMapIntensity = 0.8
+                  }
                 }
               });
             } else if (mesh.material instanceof THREE.MeshStandardMaterial) {
-              mesh.material.roughness = 0.8;
-              mesh.material.metalness = 0.2;
-              mesh.material.envMapIntensity = 0.5;
+              const mat = mesh.material
+              if (isMobile) {
+                // 모바일 - 가장 낮은 품질
+                mat.roughness = 0.9
+                mat.metalness = 0.1
+                mat.envMapIntensity = 0.3
+                mat.flatShading = true
+                if (mat.map) mat.map.minFilter = THREE.NearestFilter
+              } else if (isTablet) {
+                // 태블릿 - 중간 품질
+                mat.roughness = 0.7
+                mat.metalness = 0.3
+                mat.envMapIntensity = 0.5
+              } else {
+                // 데스크톱 - 높은 품질
+                mat.roughness = 0.5
+                mat.metalness = 0.5
+                mat.envMapIntensity = 0.8
+              }
             }
           }
         }
       });
     }
     
-    return () => window.removeEventListener('resize', checkIsMobile)
-  }, [isMobile, scene])
+    return () => {
+      window.removeEventListener('resize', checkDeviceType)
+      window.removeEventListener('orientationchange', checkDeviceType)
+    }
+  }, [isMobile, isTablet, scene])
 
   return (
-    <group ref={earthRef} scale={0.234} position={[0, 0, 0]}>
+    <group 
+      ref={earthRef} 
+      scale={isMobile ? 0.2 : isTablet ? 0.22 : 0.234} 
+      position={[0, 0, 0]}
+    >
       <primitive object={scene} />
     </group>
   )

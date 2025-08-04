@@ -45,6 +45,16 @@ body {
   }
 }
 
+/* 제목용 페이드아웃 애니메이션 (위치 이동 없음) */
+@keyframes titleFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 /* 로딩 애니메이션 */
 @keyframes loading {
   0% {

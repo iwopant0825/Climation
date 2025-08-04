@@ -9,10 +9,35 @@ import { ClimatePin } from './ClimatePin'
 // 지구와 핀들을 함께 회전시키는 컴포넌트
 function RotatingEarth({ onAsphaltCrisis, onOtherCrisis }: { onAsphaltCrisis: () => void, onOtherCrisis: (type: string) => void }) {
   const groupRef = useRef<THREE.Group>(null)
+  const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
+  
+  useEffect(() => {
+    // 기기 타입 감지
+    const checkDeviceType = () => {
+      const width = window.innerWidth
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      const isTouchDevice = 'ontouchstart' in window
+      
+      setIsMobile((isMobileDevice || isTouchDevice) && width <= 768)
+      setIsTablet((isMobileDevice || isTouchDevice) && width > 768 && width <= 1024)
+    }
+
+    checkDeviceType()
+    window.addEventListener('resize', checkDeviceType)
+    window.addEventListener('orientationchange', checkDeviceType)
+
+    return () => {
+      window.removeEventListener('resize', checkDeviceType)
+      window.removeEventListener('orientationchange', checkDeviceType)
+    }
+  }, [])
   
   useFrame((state, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.1
+      // 모바일에서는 더 느리게 회전 (배터리 및 성능 고려)
+      const rotationSpeed = isMobile ? 0.08 : isTablet ? 0.09 : 0.1
+      groupRef.current.rotation.y += delta * rotationSpeed
     }
   })
 
@@ -174,7 +199,7 @@ export function Scene() {
           pointerEvents: 'none',
           zIndex: 10000,
           opacity: 1,
-          animation: 'fadeOut 1s ease-in-out 2s forwards', // 2초 후 1초간 페이드아웃
+          animation: 'titleFadeOut 1s ease-in-out 2s forwards', // 2초 후 1초간 페이드아웃
           padding: '0 1rem', // 모바일에서 여백 추가
         }}>
           <h1 style={{
@@ -203,19 +228,20 @@ export function Scene() {
       {/* 조작 안내 */}
       <div style={{
         position: 'absolute',
-        bottom: '20px',
-        left: '20px',
+        bottom: isMobile ? '10px' : isTablet ? '15px' : '20px',
+        left: isMobile ? '10px' : isTablet ? '15px' : '20px',
         color: 'white',
         fontFamily: 'Arial, sans-serif',
-        fontSize: '14px',
+        fontSize: isMobile ? '12px' : isTablet ? '13px' : '14px',
         background: 'rgba(0, 0, 0, 0.5)',
-        padding: '10px',
+        padding: isMobile ? '8px' : isTablet ? '9px' : '10px',
         borderRadius: '5px',
         backdropFilter: 'blur(10px)',
+        maxWidth: isMobile ? '160px' : 'auto',
       }}>
-        <div>🖱️ 마우스로 지구 회전</div>
-        <div>🔍 휠로 확대/축소</div>
-        <div>🌍 지구 위 핀을 클릭하여 탐험 시작</div>
+        <div>{isMobile || isTablet ? '� 터치로 지구 회전' : '�🖱️ 마우스로 지구 회전'}</div>
+        <div>{isMobile || isTablet ? '👌 핀치로 확대/축소' : '🔍 휠로 확대/축소'}</div>
+        <div>🌍 {isMobile || isTablet ? '핀을 터치하여 탐험' : '지구 위 핀을 클릭하여 탐험 시작'}</div>
       </div>
     </div>
   )

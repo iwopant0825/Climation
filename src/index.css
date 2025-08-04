@@ -8,12 +8,45 @@ body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: linear-gradient(135deg, #000011 0%, #000033 50%, #000011 100%);
+  background: linear-gradient(135deg, #000011 0%, #000033 30%, #001122 70%, #000011 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
+}
+
+/* 배경 그라디언트 애니메이션 */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 배경 파티클 효과 */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(0, 255, 136, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(0, 136, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255, 136, 0, 0.05) 0%, transparent 50%);
+  animation: floatingParticles 30s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes floatingParticles {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(30px, -30px) rotate(120deg); }
+  66% { transform: translate(-20px, 20px) rotate(240deg); }
 }
 
 #root {
@@ -30,6 +63,30 @@ body {
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
+  }
+}
+
+/* 제목용 등장 애니메이션 (transform 충돌 방지) */
+@keyframes titleFadeIn {
+  0% {
+    opacity: 0;
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+/* 제목용 부드러운 페이드아웃 애니메이션 */
+@keyframes titleSmoothFadeOut {
+  0% {
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(8px);
   }
 }
 
@@ -55,6 +112,57 @@ body {
   }
 }
 
+/* 텍스트 글로우 애니메이션 */
+@keyframes textGlow {
+  0%, 100% {
+    text-shadow: 
+      0 0 5px rgba(0, 255, 136, 0.5),
+      0 0 10px rgba(0, 255, 136, 0.3),
+      0 0 15px rgba(0, 255, 136, 0.2);
+  }
+  50% {
+    text-shadow: 
+      0 0 10px rgba(0, 255, 136, 0.8),
+      0 0 20px rgba(0, 255, 136, 0.6),
+      0 0 30px rgba(0, 255, 136, 0.4),
+      0 0 40px rgba(0, 136, 255, 0.2);
+  }
+}
+
+/* 제목 등장 애니메이션 */
+@keyframes titleSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 부제목 등장 애니메이션 */
+@keyframes subtitleSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 호버 효과 애니메이션 */
+@keyframes hoverGlow {
+  0% {
+    box-shadow: 0 0 5px rgba(0, 255, 136, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.6), 0 0 30px rgba(0, 136, 255, 0.4);
+  }
+}
+
 /* 로딩 애니메이션 */
 @keyframes loading {
   0% {
@@ -65,6 +173,16 @@ body {
   }
   100% {
     transform: translateX(-100%);
+  }
+}
+
+/* 스핀 애니메이션 (로딩 스피너용) */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 

@@ -1,109 +1,27 @@
-import React, { useRef, useState, useEffect } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import * as THREE from 'three'
-import { Earth } from './Earth'
+import React, { useState, useEffect } from 'react'
+import { Canvas } from '@react-three/fiber'
 import { Stars } from './Stars'
 import { CameraControls } from './CameraControls'
-import { ClimatePin } from './ClimatePin'
-
-// 지구와 핀들을 함께 회전시키는 컴포넌트
-function RotatingEarth({ onAsphaltCrisis, onOtherCrisis }: { onAsphaltCrisis: () => void, onOtherCrisis: (type: string) => void }) {
-  const groupRef = useRef<THREE.Group>(null)
-  const [isMobile, setIsMobile] = useState(false)
-  const [isTablet, setIsTablet] = useState(false)
-  
-  useEffect(() => {
-    // 기기 타입 감지
-    const checkDeviceType = () => {
-      const width = window.innerWidth
-      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-      const isTouchDevice = 'ontouchstart' in window
-      
-      setIsMobile((isMobileDevice || isTouchDevice) && width <= 768)
-      setIsTablet((isMobileDevice || isTouchDevice) && width > 768 && width <= 1024)
-    }
-
-    checkDeviceType()
-    window.addEventListener('resize', checkDeviceType)
-    window.addEventListener('orientationchange', checkDeviceType)
-
-    return () => {
-      window.removeEventListener('resize', checkDeviceType)
-      window.removeEventListener('orientationchange', checkDeviceType)
-    }
-  }, [])
-  
-  useFrame((state, delta) => {
-    if (groupRef.current) {
-      // 모바일에서는 더 느리게 회전 (배터리 및 성능 고려)
-      const rotationSpeed = isMobile ? 0.08 : isTablet ? 0.09 : 0.1
-      groupRef.current.rotation.y += delta * rotationSpeed
-    }
-  })
-
-  return (
-    <group ref={groupRef}>
-      <Earth />
-      
-      {/* 기후위기 핀들 - 지구와 함께 회전 */}
-      <ClimatePin
-        position={[1.5, 0.8, 1.2]}
-        title="아스팔트 열섬 현상"
-        description="도시 아스팔트로 인한 온도 상승"
-        detailedInfo="도시의 아스팔트와 콘크리트는 태양열을 흡수하여 주변보다 2-5°C 높은 온도를 만듭니다. 이는 에너지 소비 증가, 대기질 악화, 열사병 위험 증가 등을 야기합니다."
-        color="#ff4444"
-        onClick={onAsphaltCrisis}
-      />
-      
-      <ClimatePin
-        position={[-1.2, 1.4, 0.8]}
-        title="산림 파괴"
-        description="열대우림 파괴와 생태계 변화"
-        detailedInfo="매년 축구장 27개 크기의 숲이 사라집니다. 산림은 지구 산소의 30%를 생산하고 탄소를 흡수하는 역할을 하며, 파괴 시 생물다양성 감소와 기후변화가 가속화됩니다."
-        color="#ff8800"
-        onClick={() => onOtherCrisis('산림파괴')}
-      />
-      
-      <ClimatePin
-        position={[0.5, -1.6, 1.0]}
-        title="해수면 상승"
-        description="빙하 해빙과 해안 침수"
-        detailedInfo="지구 온난화로 빙하가 녹으면서 해수면이 연간 3.3mm씩 상승하고 있습니다. 2100년까지 최대 2m 상승 예상되며, 전 세계 해안 도시들이 침수 위험에 처해있습니다."
-        color="#0088ff"
-        onClick={() => onOtherCrisis('해수면상승')}
-      />
-      
-      <ClimatePin
-        position={[-1.8, -0.2, 0.6]}
-        title="사막화"
-        description="토지 황폐화와 사막 확산"
-        detailedInfo="매년 한반도 크기의 비옥한 토지가 사막으로 변하고 있습니다. 과도한 방목, 삼림벌채, 기후변화가 주요 원인이며, 식량 생산 감소와 환경 난민 증가를 야기합니다."
-        color="#ffaa00"
-        onClick={() => onOtherCrisis('사막화')}
-      />
-      
-      <ClimatePin
-        position={[0.8, 0.2, -1.8]}
-        title="대기 오염"
-        description="미세먼지와 온실가스 증가"
-        detailedInfo="화석연료 사용으로 CO2 농도가 산업혁명 이전보다 50% 증가했습니다. 미세먼지는 연간 700만 명의 조기 사망을 야기하며, 온실가스는 지구 평균 온도를 1.1°C 상승시켰습니다."
-        color="#888888"
-        onClick={() => onOtherCrisis('대기오염')}
-      />
-    </group>
-  )
-}
+import RotatingEarth from './RotatingEarth'
 
 export function Scene() {
   const [showTitle, setShowTitle] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const [isTablet, setIsTablet] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // 기후 위기 핸들러
+  const handleAsphaltCrisis = () => {
+    console.log('아스팔트 위기 탐험!')
+    // 여기에 아스팔트 위기 관련 로직 추가
+  }
+
+  const handleOtherCrisis = (type: string) => {
+    console.log(`${type} 위기 탐험!`)
+    // 여기에 다른 위기 관련 로직 추가
+  }
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowTitle(false)
-    }, 3000) // 3초 후 제목 숨김
-
     // 기기 타입 감지
     const checkDeviceType = () => {
       const width = window.innerWidth
@@ -118,131 +36,221 @@ export function Scene() {
     window.addEventListener('resize', checkDeviceType)
     window.addEventListener('orientationchange', checkDeviceType)
 
+    // 로딩 시뮬레이션
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false)
+    }, 2000)
+
+    // 타이틀 자동 숨김
+    const titleTimer = setTimeout(() => {
+      setShowTitle(false)
+    }, 5000)
+
     return () => {
-      clearTimeout(timer)
       window.removeEventListener('resize', checkDeviceType)
       window.removeEventListener('orientationchange', checkDeviceType)
+      clearTimeout(loadingTimer)
+      clearTimeout(titleTimer)
     }
   }, [])
 
-  const handleAsphaltCrisis = () => {
-    console.log('아스팔트 기후위기 세계로 이동!')
-    alert('아스팔트 기후위기 메타버스로 이동합니다!')
-  }
-
-  const handleOtherCrisis = (type: string) => {
-    console.log(`${type} 기후위기 - 추후 구현 예정`)
-    alert(`${type} 관련 메타버스는 추후 구현 예정입니다.`)
-  }
-
   return (
-    <div style={{ width: '100vw', height: '100vh', background: '#000011' }}>
-      <Canvas
-        camera={{ 
-          position: isMobile ? [0, 0, 10] : isTablet ? [0, 0, 9] : [0, 0, 8],
-          fov: isMobile ? 60 : isTablet ? 55 : 50,
-          near: 0.1,
-          far: 1000
-        }}
-        gl={{
-          antialias: !isMobile, // 모바일에서 성능 최적화
-          alpha: false,
-          powerPreference: isMobile ? 'low-power' : 'high-performance',
-        }}
-        dpr={isMobile ? [1, 1.5] : [1, 2]} // 모바일에서 픽셀 밀도 제한
-        style={{ 
-          touchAction: 'none', // 터치 스크롤 방지
-          userSelect: 'none',
-        }}
-      >
-        {/* 주변광 */}
-        <ambientLight intensity={0.2} />
-        
-        {/* 태양광 (주광원) */}
-        <directionalLight
-          position={[10, 10, 5]}
-          intensity={1.5}
-          color="#ffffff"
-          castShadow
-        />
-        
-        {/* 보조광 */}
-        <pointLight
-          position={[-10, -10, -10]}
-          intensity={0.5}
-          color="#4444ff"
-        />
-        
-        {/* 우주 배경 별들 */}
-        <Stars />
-        
-        {/* 회전하는 지구와 핀들 */}
-        <RotatingEarth 
-          onAsphaltCrisis={handleAsphaltCrisis}
-          onOtherCrisis={handleOtherCrisis}
-        />
-        
-        {/* 카메라 컨트롤 */}
-        <CameraControls />
-      </Canvas>
-      
-      {/* UI 오버레이 */}
-      {showTitle && (
+    <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+      {/* 로딩 화면 */}
+      {isLoading && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(135deg, #0a1929 0%, #1a2332 50%, #0a1929 100%)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          animation: 'fadeOut 0.5s ease-out 1.5s both',
+        }}>
+          <div style={{
+            width: '80px',
+            height: '80px',
+            border: '4px solid rgba(0, 255, 136, 0.3)',
+            borderTop: '4px solid #00ff88',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            marginBottom: '20px',
+          }} />
+          <div style={{
+            color: '#00ff88',
+            fontSize: isMobile ? '18px' : '24px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            animation: 'pulse 1.5s ease-in-out infinite',
+          }}>
+            기후 위기 메타버스 로딩 중...
+          </div>
+          <div style={{
+            color: 'rgba(255, 255, 255, 0.7)',
+            fontSize: isMobile ? '12px' : '14px',
+            marginTop: '10px',
+            textAlign: 'center',
+          }}>
+            지구의 현재 상태를 확인하세요
+          </div>
+        </div>
+      )}
+
+      {/* 메인 타이틀 */}
+      {showTitle && !isLoading && (
         <div style={{
           position: 'absolute',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          color: 'white',
-          fontFamily: 'Arial, sans-serif',
+          zIndex: 100,
           textAlign: 'center',
+          color: 'white',
           pointerEvents: 'none',
-          zIndex: 10000,
-          opacity: 1,
-          animation: 'titleFadeOut 1s ease-in-out 2s forwards', // 2초 후 1초간 페이드아웃
-          padding: '0 1rem', // 모바일에서 여백 추가
         }}>
           <h1 style={{
-            fontSize: isMobile ? 'clamp(2rem, 8vw, 3rem)' : isTablet ? 'clamp(2.5rem, 6vw, 3.5rem)' : '3rem',
-            marginBottom: '1rem',
-            background: 'linear-gradient(45deg, #00ff88, #0088ff)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            textShadow: '0 0 20px rgba(0, 255, 136, 0.5)',
-            animation: 'fadeIn 1s ease-in-out',
+            fontSize: isMobile ? '32px' : isTablet ? '42px' : '48px',
+            fontWeight: 'bold',
+            margin: '0 0 16px 0',
+            color: '#00ff88',
+            textShadow: '0 0 20px rgba(0, 255, 136, 0.6)',
+            letterSpacing: '2px',
+            opacity: 0,
+            animation: 'titleFadeIn 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both, titleSmoothFadeOut 1.5s cubic-bezier(0.55, 0.06, 0.68, 0.19) 4s both',
           }}>
-            CLIMATION
+            기후 위기 메타버스
           </h1>
           <p style={{
-            fontSize: isMobile ? 'clamp(0.9rem, 4vw, 1.1rem)' : isTablet ? 'clamp(1rem, 3vw, 1.3rem)' : '1.2rem',
-            opacity: 0.8,
-            animation: 'fadeIn 1.5s ease-in-out',
-            lineHeight: 1.4,
+            fontSize: isMobile ? '16px' : isTablet ? '18px' : '20px',
+            margin: '0',
+            fontWeight: '300',
+            color: 'rgba(255, 255, 255, 0.9)',
+            textShadow: '0 0 10px rgba(255, 255, 255, 0.3)',
+            opacity: 0,
+            animation: 'titleFadeIn 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.8s both, titleSmoothFadeOut 1.5s cubic-bezier(0.55, 0.06, 0.68, 0.19) 4s both',
           }}>
-            지구를 둘러보며 기후위기의 현실을 체험하고<br />
-            해결책을 함께 찾아보세요
+            지구의 현재를 탐험하고 미래를 생각해보세요
           </p>
         </div>
       )}
 
+      {/* 3D 캔버스 */}
+      <Canvas
+        camera={{ position: [0, 0, 5], fov: 75 }}
+        style={{ background: 'transparent' }}
+      >
+        {/* 전체 기본 조명 - 밝기 증가 */}
+        <ambientLight intensity={0.6} />
+        
+        {/* 메인 태양광 (지구 정면) */}
+        <directionalLight 
+          position={[10, 10, 5]} 
+          intensity={1.2} 
+          color="#ffffff"
+          castShadow
+        />
+        
+        {/* 보조 조명 (지구 측면) */}
+        <pointLight 
+          position={[-8, 5, 8]} 
+          intensity={0.8} 
+          color="#ffeaa7"
+        />
+        
+        {/* 뒷조명 (지구 뒤쪽 가장자리) */}
+        <pointLight 
+          position={[0, -5, -10]} 
+          intensity={0.5} 
+          color="#74b9ff"
+        />
+        
+        {/* 상단 조명 (북극 쪽) */}
+        <pointLight 
+          position={[0, 15, 0]} 
+          intensity={0.4} 
+          color="#fdcb6e"
+        />
+        
+        <Stars />
+        <RotatingEarth 
+          onAsphaltCrisis={handleAsphaltCrisis}
+          onOtherCrisis={handleOtherCrisis}
+        />
+        <CameraControls />
+      </Canvas>
+
       {/* 조작 안내 */}
-      <div style={{
-        position: 'absolute',
-        bottom: isMobile ? '10px' : isTablet ? '15px' : '20px',
-        left: isMobile ? '10px' : isTablet ? '15px' : '20px',
-        color: 'white',
-        fontFamily: 'Arial, sans-serif',
-        fontSize: isMobile ? '12px' : isTablet ? '13px' : '14px',
-        background: 'rgba(0, 0, 0, 0.5)',
-        padding: isMobile ? '8px' : isTablet ? '9px' : '10px',
-        borderRadius: '5px',
-        backdropFilter: 'blur(10px)',
-        maxWidth: isMobile ? '160px' : 'auto',
-      }}>
-        <div>{isMobile || isTablet ? '� 터치로 지구 회전' : '�🖱️ 마우스로 지구 회전'}</div>
-        <div>{isMobile || isTablet ? '👌 핀치로 확대/축소' : '🔍 휠로 확대/축소'}</div>
-        <div>🌍 {isMobile || isTablet ? '핀을 터치하여 탐험' : '지구 위 핀을 클릭하여 탐험 시작'}</div>
-      </div>
+      {!isLoading && (
+        <div style={{
+          position: 'absolute',
+          bottom: isMobile ? '15px' : isTablet ? '20px' : '25px',
+          left: isMobile ? '15px' : isTablet ? '20px' : '25px',
+          color: 'white',
+          fontFamily: 'Arial, sans-serif',
+          fontSize: isMobile ? '12px' : isTablet ? '13px' : '14px',
+          background: 'rgba(0, 0, 0, 0.7)',
+          padding: isMobile ? '12px' : isTablet ? '14px' : '16px',
+          borderRadius: '12px',
+          backdropFilter: 'blur(15px)',
+          border: '1px solid rgba(0, 255, 136, 0.3)',
+          maxWidth: isMobile ? '180px' : '220px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 255, 136, 0.1)',
+          animation: 'fadeIn 2s ease-in-out 1s both',
+          transition: 'all 0.3s ease',
+        }}>
+          <div style={{ 
+            marginBottom: '8px', 
+            fontWeight: 'bold', 
+            color: '#00ff88',
+            fontSize: isMobile ? '13px' : '15px'
+          }}>
+            🎮 조작법
+          </div>
+          <div style={{ marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ color: '#0088ff' }}>🖱️</span>
+            <span>{isMobile || isTablet ? '터치로 지구 회전' : '마우스로 지구 회전'}</span>
+          </div>
+          <div style={{ marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ color: '#ff8800' }}>🔍</span>
+            <span>{isMobile || isTablet ? '핀치로 확대/축소' : '휠로 확대/축소'}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ color: '#ff4444' }}>🌍</span>
+            <span>{isMobile || isTablet ? '핀을 터치하여 탐험' : '핀을 클릭하여 탐험'}</span>
+          </div>
+        </div>
+      )}
+
+      {/* 우측 하단 정보 */}
+      {!isLoading && (
+        <div style={{
+          position: 'absolute',
+          bottom: isMobile ? '15px' : '25px',
+          right: isMobile ? '15px' : '25px',
+          color: 'rgba(255, 255, 255, 0.8)',
+          fontFamily: 'Arial, sans-serif',
+          fontSize: isMobile ? '11px' : '12px',
+          textAlign: 'right',
+          background: 'rgba(0, 0, 0, 0.5)',
+          padding: isMobile ? '8px 12px' : '10px 15px',
+          borderRadius: '8px',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          animation: 'fadeIn 2s ease-in-out 2s both',
+        }}>
+          <div style={{ fontWeight: 'bold', color: '#00ff88', marginBottom: '4px' }}>
+            Climate Crisis Metaverse
+          </div>
+          <div style={{ opacity: 0.8 }}>
+            Ver 1.0 | 2024
+          </div>
+        </div>
+      )}
     </div>
   )
 }

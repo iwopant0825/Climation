@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useCylinder } from '@react-three/cannon'
 import { Vector3, Euler } from 'three'
-import * as THREE from 'three'
 
 interface PlayerProps {
   position?: [number, number, number]
@@ -34,7 +33,6 @@ export function Player({
 
   const velocity = useRef<[number, number, number]>([0, 0, 0])
   const pos = useRef<[number, number, number]>(position)
-  const cameraDirection = useRef<THREE.Vector3>(new THREE.Vector3())
   const [isOnGround, setIsOnGround] = useState(false)
   
   // 카메라 각도 (MobileCameraControls와 동기화용)

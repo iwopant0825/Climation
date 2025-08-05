@@ -32,14 +32,11 @@ export function MobileCameraControls({
     const canvas = gl.domElement
 
     const handleTouchStart = (event: TouchEvent) => {
-      console.log('Touch start detected on canvas')
       if (event.touches.length !== 1) return
       
       const touch = event.touches[0]
       previousTouch.current = { x: touch.clientX, y: touch.clientY }
       isDragging.current = true
-      
-      console.log('Canvas touch start:', previousTouch.current)
     }
 
     const handleTouchMove = (event: TouchEvent) => {
@@ -50,8 +47,8 @@ export function MobileCameraControls({
       const deltaX = touch.clientX - previousTouch.current.x
       const deltaY = touch.clientY - previousTouch.current.y
       
-      // 모바일 터치 감도
-      const sensitivity = 0.008
+      // 모바일 터치 감도 (더 부드럽게)
+      const sensitivity = 0.006
       
       cameraRotation.current.y -= deltaX * sensitivity
       cameraRotation.current.x -= deltaY * sensitivity
@@ -66,12 +63,9 @@ export function MobileCameraControls({
       onCameraMove?.(cameraRotation.current)
       
       previousTouch.current = { x: touch.clientX, y: touch.clientY }
-      
-      console.log('Canvas camera moving - rotation:', cameraRotation.current)
     }
 
     const handleTouchEnd = (event: TouchEvent) => {
-      console.log('Touch end detected')
       previousTouch.current = null
       isDragging.current = false
     }
@@ -81,8 +75,6 @@ export function MobileCameraControls({
     canvas.addEventListener('touchmove', handleTouchMove, { passive: true })
     canvas.addEventListener('touchend', handleTouchEnd, { passive: true })
     canvas.addEventListener('touchcancel', handleTouchEnd, { passive: true })
-
-    console.log('Mobile camera controls initialized for canvas')
 
     return () => {
       canvas.removeEventListener('touchstart', handleTouchStart)

@@ -174,15 +174,16 @@ export function Player({
       return
     }
     
-    // 카메라 방향 업데이트
-    const euler = new Euler(cameraRotation.current.x, cameraRotation.current.y, 0, 'YXZ')
-    cameraDirection.current.set(0, 0, -1).applyEuler(euler)
-    
     // 카메라 위치 설정 (1인칭)
     camera.position.set(x, y + 0.4, z) // 눈 높이
-    camera.setRotationFromEuler(euler)
     
-    // 이동 방향 계산 (키보드 + 가상 조이스틱)
+    // 데스크톱에서만 카메라 회전 설정 (모바일은 MobileCameraControls에서 처리)
+    if (!isMobile) {
+      const euler = new Euler(cameraRotation.current.x, cameraRotation.current.y, 0, 'YXZ')
+      camera.setRotationFromEuler(euler)
+    }
+    
+    // 이동 방향 계산 (카메라 방향 기준)
     const moveDirection = new Vector3()
     const forward = new Vector3(0, 0, -1).applyQuaternion(camera.quaternion)
     const right = new Vector3(1, 0, 0).applyQuaternion(camera.quaternion)
@@ -206,7 +207,7 @@ export function Player({
     }
     
     // 이동 속도 적용
-    const moveSpeed = isOnGround ? (isMobile ? 45 : 55) : 3 // 모바일에서 약간 느리게
+    const moveSpeed = isOnGround ? (isMobile ? 40 : 55) : 3 // 모바일에서 더 느리게 (45→40)
     moveDirection.multiplyScalar(moveSpeed)
     
     // 수평 이동 적용 - 공중에서는 현재 속도에 추가하는 방식

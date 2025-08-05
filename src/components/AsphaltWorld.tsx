@@ -317,12 +317,12 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           powerPreference: isMobile ? "low-power" : "high-performance"
         }}
         dpr={isMobile ? [1, 1.5] : [1, 2]} // 모바일에서 해상도 조정
-        performance={{ min: 0.5 }}
+        performance={{ min: isMobile ? 0.3 : 0.5 }} // 모바일에서 더 적극적인 성능 조정
         camera={{
           position: [0, 5, 10],
           fov: isMobile ? 85 : 75, // 모바일에서 더 넓은 시야
           near: 0.1,
-          far: isMobile ? 500 : 1000, // 모바일에서 렌더 거리 단축
+          far: isMobile ? 300 : 1000, // 모바일에서 렌더 거리 더 단축
         }}
         onCreated={({ gl }) => {
           // 데스크톱에서만 클릭 이벤트 처리  
@@ -341,6 +341,8 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             friction: 0.4,
             restitution: 0.1,
           }}
+          stepSize={isMobile ? 1/30 : 1/60} // 모바일에서 물리 계산 빈도 감소
+          maxSubSteps={isMobile ? 3 : 5} // 모바일에서 반복 계산 감소
         >
                     {/* 망가진 도시 느낌의 조명 설정 */}
           <ambientLight intensity={0.2} color="#ffddbb" />

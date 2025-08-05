@@ -300,21 +300,26 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           background: 'rgba(0, 0, 0, 0.8)',
           zIndex: 2000,
           display: 'flex',
-          alignItems: 'center',
+          alignItems: isMobile ? 'flex-start' : 'center', // 모바일에서는 상단 정렬
           justifyContent: 'center',
-          padding: isMobile ? '20px' : '40px'
+          padding: isMobile ? '10px 15px calc(20px + env(safe-area-inset-bottom))' : '40px', // 모바일에서 안전 영역 고려
+          paddingTop: isMobile ? 'calc(20px + env(safe-area-inset-top))' : '40px', // 상단 안전 영역
+          overflowY: 'auto' // 세로 스크롤 허용
         }}>
           <div style={{
             background: 'linear-gradient(135deg, rgba(20, 20, 40, 0.95) 0%, rgba(40, 20, 20, 0.95) 100%)',
             borderRadius: '20px',
-            padding: isMobile ? '20px' : '30px',
+            padding: isMobile ? '15px' : '30px',
             maxWidth: isMobile ? '100%' : '800px',
-            maxHeight: '90vh',
-            overflow: 'auto',
+            width: isMobile ? '100%' : 'auto',
+            maxHeight: isMobile ? 'none' : '90vh', // 모바일에서는 높이 제한 해제
+            overflow: isMobile ? 'visible' : 'auto',
             backdropFilter: 'blur(20px)',
             border: '2px solid rgba(255, 69, 0, 0.4)',
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
-            color: 'white'
+            color: 'white',
+            marginTop: isMobile ? '10px' : '0', // 모바일에서 상단 여백
+            marginBottom: isMobile ? '10px' : '0' // 모바일에서 하단 여백
           }}>
             {/* 제목 */}
             <h1 style={{
@@ -892,9 +897,10 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             }}>
               {isMobile ? (
                 <>
-                  <span style={{color: '#74b9ff'}}>👆 화면 드래그</span>: 시점 조작<br/>
+                  <span style={{color: '#74b9ff'}}>👆 화면 드래그</span>: 시점 조작 (조이스틱 외 영역)<br/>
                   <span style={{color: '#fd79a8'}}>🕹️ 가상패드</span>: 이동 | 
-                  <span style={{color: '#fdcb6e'}}> 🔘 버튼</span>: 점프
+                  <span style={{color: '#fdcb6e'}}> 🔘 버튼</span>: 점프<br/>
+                  <span style={{color: '#a29bfe', fontSize: '11px'}}>💡 조이스틱과 시점 조작을 동시에 사용 가능!</span>
                 </>
               ) : (
                 <>
@@ -930,6 +936,9 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           far: isMobile ? 300 : 1000, // 모바일에서 렌더 거리 더 단축
         }}
         onCreated={({ gl }) => {
+          // Canvas에 터치 이벤트 최적화 설정
+          gl.domElement.style.touchAction = 'none' // 기본 터치 제스처 비활성화
+          
           // 데스크톱에서만 클릭 이벤트 처리  
           if (!isMobile) {
             gl.domElement.addEventListener('click', () => {
@@ -945,6 +954,14 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             }
             
             document.addEventListener('pointerlockchange', handlePointerLockChange)
+          } else {
+            // 모바일에서는 터치 최적화
+            gl.domElement.addEventListener('touchstart', (e) => {
+              // 멀티 터치 방지
+              if (e.touches.length > 1) {
+                e.preventDefault()
+              }
+            }, { passive: false })
           }
         }}
       >

@@ -16,6 +16,7 @@ export function MobileCameraControls({
   const previousTouch = useRef<{ x: number; y: number } | null>(null)
   const cameraRotation = useRef({ x: 0, y: 0 })
   const isDragging = useRef(false)
+  const activeTouchId = useRef<number | null>(null) // 활성 터치 ID 추적
 
   // useFrame을 사용해서 매 프레임마다 카메라 회전 적용
   useFrame(() => {
@@ -32,20 +33,81 @@ export function MobileCameraControls({
     const canvas = gl.domElement
 
     const handleTouchStart = (event: TouchEvent) => {
-      if (event.touches.length !== 1) return
+      // 이미 터치가 활성화되어 있으면 무시
+      if (activeTouchId.current !== null) return
       
       const touch = event.touches[0]
+      if (!touch) return
+      
+      // 조이스틱 영역 체크 (왼쪽 하단)
+      const joystickArea = {
+        left: 0,
+        top: window.innerHeight - 200, // 하단 200px
+        right: 200, // 왼쪽 200px
+        bottom: window.innerHeight
+      }
+      
+      // 페인트 버튼 영역 체크 (오른쪽 하단)
+      const paintButtonArea = {
+        left: window.innerWidth - 120,
+        top: window.innerHeight - 200,
+        right: window.innerWidth,
+        bottom: window.innerHeight
+      }
+      
+      // 조이스틱이나 페인트 버튼 영역 내의 터치는 무시
+      if ((touch.clientX >= joystickArea.left && touch.clientX <= joystickArea.right &&
+           touch.clientY >= joystickArea.top && touch.clientY <= joystickArea.bottom) ||
+          (touch.clientX >= paintButtonArea.left && touch.clientX <= paintButtonArea.right &&
+           touch.clientY >= paintButtonArea.top && touch.clientY <= paintButtonArea.bottom)) {
+        return
+      }
+      
+      activeTouchId.current = touch.identifier
       previousTouch.current = { x: touch.clientX, y: touch.clientY }
       isDragging.current = true
     }
 
     const handleTouchMove = (event: TouchEvent) => {
-      if (!previousTouch.current || event.touches.length !== 1 || !isDragging.current) return
+      if (!previousTouch.current || !isDragging.current || activeTouchId.current === null) return
       
-      const touch = event.touches[0]
+      // 활성 터치 ID와 일치하는 터치 찾기
+      let activeTouch = null
+      for (let i = 0; i < event.touches.length; i++) {
+        if (event.touches[i].identifier === activeTouchId.current) {
+          activeTouch = event.touches[i]
+          break
+        }
+      }
       
-      const deltaX = touch.clientX - previousTouch.current.x
-      const deltaY = touch.clientY - previousTouch.current.y
+      if (!activeTouch) return
+      
+      // 조이스틱이나 페인트 버튼 영역으로 터치가 이동한 경우 시점 조작 중단
+      const joystickArea = {
+        left: 0,
+        top: window.innerHeight - 200,
+        right: 200,
+        bottom: window.innerHeight
+      }
+      
+      const paintButtonArea = {
+        left: window.innerWidth - 120,
+        top: window.innerHeight - 200,
+        right: window.innerWidth,
+        bottom: window.innerHeight
+      }
+      
+      if ((activeTouch.clientX >= joystickArea.left && activeTouch.clientX <= joystickArea.right &&
+           activeTouch.clientY >= joystickArea.top && activeTouch.clientY <= joystickArea.bottom) ||
+          (activeTouch.clientX >= paintButtonArea.left && activeTouch.clientX <= paintButtonArea.right &&
+           activeTouch.clientY >= paintButtonArea.top && activeTouch.clientY <= paintButtonArea.bottom)) {
+        isDragging.current = false
+        activeTouchId.current = null
+        return
+      }
+      
+      const deltaX = activeTouch.clientX - previousTouch.current.x
+      const deltaY = activeTouch.clientY - previousTouch.current.y
       
       // 모바일 터치 감도 (더 부드럽게)
       const sensitivity = 0.006
@@ -62,12 +124,26 @@ export function MobileCameraControls({
       // 부모 컴포넌트에 카메라 회전 정보 전달
       onCameraMove?.(cameraRotation.current)
       
-      previousTouch.current = { x: touch.clientX, y: touch.clientY }
+      previousTouch.current = { x: activeTouch.clientX, y: activeTouch.clientY }
     }
 
     const handleTouchEnd = (event: TouchEvent) => {
-      previousTouch.current = null
-      isDragging.current = false
+      if (activeTouchId.current === null) return
+      
+      // 활성 터치가 종료되었는지 확인
+      let activeTouchEnded = true
+      for (let i = 0; i < event.touches.length; i++) {
+        if (event.touches[i].identifier === activeTouchId.current) {
+          activeTouchEnded = false
+          break
+        }
+      }
+      
+      if (activeTouchEnded) {
+        previousTouch.current = null
+        isDragging.current = false
+        activeTouchId.current = null
+      }
     }
 
     // Canvas에 직접 터치 이벤트 리스너 추가

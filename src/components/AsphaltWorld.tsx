@@ -302,9 +302,10 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           display: 'flex',
           alignItems: isMobile ? 'flex-start' : 'center', // 모바일에서는 상단 정렬
           justifyContent: 'center',
-          padding: isMobile ? '10px 15px calc(20px + env(safe-area-inset-bottom))' : '40px', // 모바일에서 안전 영역 고려
+          padding: isMobile ? '10px 10px 100px' : '40px', // 모바일에서 하단 패딩 대폭 증가
           paddingTop: isMobile ? 'calc(20px + env(safe-area-inset-top))' : '40px', // 상단 안전 영역
-          overflowY: 'auto' // 세로 스크롤 허용
+          overflowY: 'auto', // 세로 스크롤 허용
+          WebkitOverflowScrolling: 'touch' // iOS 스크롤 최적화
         }}>
           <div style={{
             background: 'linear-gradient(135deg, rgba(20, 20, 40, 0.95) 0%, rgba(40, 20, 20, 0.95) 100%)',
@@ -312,14 +313,17 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             padding: isMobile ? '15px' : '30px',
             maxWidth: isMobile ? '100%' : '800px',
             width: isMobile ? '100%' : 'auto',
-            maxHeight: isMobile ? 'none' : '90vh', // 모바일에서는 높이 제한 해제
-            overflow: isMobile ? 'visible' : 'auto',
+            maxHeight: isMobile ? 'calc(100vh - 140px)' : '90vh', // 모바일에서 패딩 고려한 높이 설정
+            overflow: isMobile ? 'auto' : 'auto', // 모바일에서도 스크롤 허용
             backdropFilter: 'blur(20px)',
             border: '2px solid rgba(255, 69, 0, 0.4)',
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
             color: 'white',
-            marginTop: isMobile ? '10px' : '0', // 모바일에서 상단 여백
-            marginBottom: isMobile ? '10px' : '0' // 모바일에서 하단 여백
+            marginTop: isMobile ? '0' : '0', // 모바일에서 상단 여백 제거
+            marginBottom: isMobile ? '0' : '0', // 모바일에서 하단 여백 제거
+            // 모바일에서 스크롤 스타일 개선
+            scrollbarWidth: isMobile ? 'thin' : 'auto',
+            scrollbarColor: isMobile ? 'rgba(255,255,255,0.3) transparent' : 'auto'
           }}>
             {/* 제목 */}
             <h1 style={{
@@ -549,7 +553,11 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             </div>
 
             {/* 탐험 시작 버튼 */}
-            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <div style={{ 
+              textAlign: 'center', 
+              marginTop: '20px',
+              paddingBottom: isMobile ? '30px' : '0' // 모바일에서 추가 하단 여백
+            }}>
               {selectedTechnology === 'heatpaint' ? (
                 <button
                   onClick={() => setShowEducationPopup(false)}
@@ -1480,6 +1488,25 @@ if (!document.head.querySelector('#temperature-animations')) {
       50% {
         background: rgba(0, 255, 136, 0.15);
       }
+    }
+    
+    /* 모바일 스크롤바 스타일 */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 107, 71, 0.6);
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 107, 71, 0.8);
     }
   `
   document.head.appendChild(style)

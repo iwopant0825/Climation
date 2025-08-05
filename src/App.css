@@ -248,3 +248,26 @@
     height: 100dvh;
   }
 }
+
+/* 온도계 애니메이션 */
+@keyframes heatPulse {
+  0%, 100% {
+    opacity: 0.9;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1.02);
+  }
+}
+
+@keyframes tempPulse {
+  0%, 100% {
+    opacity: 0.9;
+    box-shadow: 0 0 15px rgba(255, 68, 68, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 25px rgba(255, 68, 68, 0.8), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  }
+}

@@ -192,28 +192,119 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
         </div>
       </div>
 
-      {/* 온도 표시 - 반응형 디자인 */}
+      {/* 온도계 UI - 화면 왼쪽 가운데 */}
       <div style={{
-        position: 'absolute',
-        bottom: isMobile ? 'calc(140px + env(safe-area-inset-bottom))' : '20px', // 모바일에서 가상 조이스틱 공간 확보
-        left: isMobile ? '50%' : '20px',
-        transform: isMobile ? 'translateX(-50%)' : 'none',
-        background: 'linear-gradient(135deg, rgba(255, 69, 0, 0.8) 0%, rgba(255, 140, 0, 0.9) 100%)',
-        color: 'white',
-        padding: isMobile ? '8px 14px' : '10px 18px',
-        borderRadius: '40px',
+        position: 'fixed',
+        left: isMobile ? '15px' : '25px',
+        top: '50%',
+        transform: 'translateY(-50%)',
         zIndex: 1000,
-        fontSize: isMobile ? '13px' : '15px',
-        fontWeight: 'bold',
-        backdropFilter: 'blur(20px)',
-        boxShadow: '0 6px 24px rgba(255, 69, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        background: 'rgba(0, 0, 0, 0.7)',
+        padding: isMobile ? '15px 8px' : '20px 12px',
+        borderRadius: '20px',
+        backdropFilter: 'blur(15px)',
         border: '1px solid rgba(255, 255, 255, 0.2)',
-        textShadow: '0 0 15px rgba(0, 0, 0, 0.3)',
-        letterSpacing: '0.5px',
-        animation: 'tempPulse 2s ease-in-out infinite',
-        textAlign: 'center' as const,
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
       }}>
-        {isMobile ? '🌡️ 38°C +5°C ↑' : '도심 온도: 38°C '}<span style={{color: '#ffff99', textShadow: '0 0 10px rgba(255, 255, 153, 0.8)'}}>{!isMobile && '+5°C ↑'}</span>
+        {/* 온도계 제목 */}
+        <div style={{
+          fontSize: isMobile ? '10px' : '12px',
+          color: 'rgba(255, 255, 255, 0.8)',
+          marginBottom: '8px',
+          fontWeight: 'bold',
+          letterSpacing: '0.5px'
+        }}>
+          도심 온도
+        </div>
+        
+        {/* 온도계 본체 */}
+        <div style={{
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          marginBottom: '10px'
+        }}>
+          {/* 온도계 막대 */}
+          <div style={{
+            position: 'relative',
+            width: isMobile ? '12px' : '16px',
+            height: isMobile ? '120px' : '150px',
+            background: 'linear-gradient(to top, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+            borderRadius: '8px 8px 0 0', // 상단만 둥글게
+            border: '2px solid rgba(255, 255, 255, 0.3)',
+            borderBottom: 'none', // 하단 경계 제거
+            overflow: 'hidden',
+            zIndex: 2
+          }}>
+            {/* 온도 표시 바 (38°C = 76% 정도) */}
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              width: '100%',
+              height: '76%', // 38°C 기준 (50°C 만점으로 가정)
+              background: 'linear-gradient(to top, #ff4444 0%, #ff6b35 40%, #ffa500 80%, #ffff00 100%)',
+              borderRadius: '4px 4px 0 0', // 상단만 둥글게
+              animation: 'heatPulse 2s ease-in-out infinite',
+              boxShadow: 'inset 0 0 10px rgba(255, 255, 255, 0.3)'
+            }} />
+            
+            {/* 온도계 눈금 */}
+            {[0, 25, 50, 75, 100].map((position, index) => (
+              <div key={index} style={{
+                position: 'absolute',
+                right: '-8px',
+                bottom: `${position}%`,
+                width: '4px',
+                height: '1px',
+                background: 'rgba(255, 255, 255, 0.6)',
+                fontSize: isMobile ? '8px' : '9px',
+                color: 'rgba(255, 255, 255, 0.6)',
+              }} />
+            ))}
+          </div>
+          
+          {/* 온도계 구부 (막대와 연결) */}
+          <div style={{
+            width: isMobile ? '20px' : '24px',
+            height: isMobile ? '20px' : '24px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #ff4444 0%, #ff6b35 100%)',
+            border: '2px solid rgba(255, 255, 255, 0.3)',
+            marginTop: '-2px', // 막대와 겹치도록
+            boxShadow: '0 0 15px rgba(255, 68, 68, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
+            animation: 'tempPulse 2s ease-in-out infinite',
+            zIndex: 1
+          }} />
+        </div>
+        
+        {/* 온도 수치 */}
+        <div style={{
+          fontSize: isMobile ? '16px' : '20px',
+          fontWeight: 'bold',
+          color: '#ff6b35',
+          textShadow: '0 0 10px rgba(255, 107, 53, 0.8)',
+          marginBottom: '4px'
+        }}>
+          38°C
+        </div>
+        
+        {/* 상승 표시 */}
+        <div style={{
+          fontSize: isMobile ? '10px' : '12px',
+          color: '#ffff99',
+          fontWeight: 'bold',
+          textShadow: '0 0 8px rgba(255, 255, 153, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '2px'
+        }}>
+          <span style={{ fontSize: isMobile ? '12px' : '14px' }}>↑</span>
+          +5°C
+        </div>
       </div>
 
       {/* 경계 경고 UI - 반응형 */}

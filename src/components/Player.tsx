@@ -217,8 +217,8 @@ export function Player({
     } else {
       // 공중에서는 이동 입력이 있을 때만 아주 작은 조작력 추가
       if (moveDirection.length() > 0) {
-        const airControl = 0.02 // 공중 조작력을 더욱 줄임
-        const maxAirSpeed = 12 // 공중에서 최대 수평 속도를 더 제한
+        const airControl = 0.015 // 공중 조작력을 더욱 줄임 (0.02 → 0.015)
+        const maxAirSpeed = 10 // 공중에서 최대 수평 속도를 더 제한 (12 → 10)
         
         const newVx = vx + moveDirection.x * airControl
         const newVz = vz + moveDirection.z * airControl
@@ -233,14 +233,24 @@ export function Player({
         }
       } else {
         // 이동 입력이 없으면 공기 저항 적용으로 속도 감소
-        const airResistance = 0.98
+        const airResistance = 0.95 // 공기 저항 증가 (0.98 → 0.95)
         api.velocity.set(vx * airResistance, vy, vz * airResistance)
       }
     }
     
     // 점프 (지면에 있을 때만) - 키보드 또는 모바일 버튼
     if ((keys.current.jump || (isMobile && jumpPressed)) && isOnGround) {
-      api.velocity.set(vx, 8, vz)
+      // 점프 시 현재 수평 속도를 약간 줄여서 급가속 방지
+      const currentHorizontalSpeed = Math.sqrt(vx * vx + vz * vz)
+      const jumpSpeedReduction = 0.7 // 점프 시 수평 속도를 70%로 감소
+      
+      if (currentHorizontalSpeed > 0) {
+        const reducedVx = vx * jumpSpeedReduction
+        const reducedVz = vz * jumpSpeedReduction
+        api.velocity.set(reducedVx, 8, reducedVz)
+      } else {
+        api.velocity.set(0, 8, 0)
+      }
     }
   })
 

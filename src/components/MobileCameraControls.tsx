@@ -12,7 +12,7 @@ export function MobileCameraControls({
   isLocked = false,
   onCameraMove 
 }: MobileCameraControlsProps) {
-  const { camera, gl } = useThree()
+  const { camera } = useThree()
   const previousTouch = useRef<{ x: number; y: number } | null>(null)
   const cameraRotation = useRef({ x: 0, y: 0 })
   const isDragging = useRef(false)
@@ -39,7 +39,7 @@ export function MobileCameraControls({
       previousTouch.current = { x: touch.clientX, y: touch.clientY }
       isDragging.current = true
       
-      console.log('Touch start:', previousTouch.current) // 디버그용
+      console.log('🎯 Touch start:', previousTouch.current, 'Target:', target?.tagName) // 디버그용
     }
 
     const handleTouchMove = (event: TouchEvent) => {
@@ -62,7 +62,7 @@ export function MobileCameraControls({
       const deltaY = touch.clientY - previousTouch.current.y
       
       // 모바일 터치 감도 (더 민감하게)
-      const sensitivity = 0.012
+      const sensitivity = 0.015
       
       cameraRotation.current.y -= deltaX * sensitivity
       cameraRotation.current.x -= deltaY * sensitivity
@@ -83,7 +83,7 @@ export function MobileCameraControls({
       
       previousTouch.current = { x: touch.clientX, y: touch.clientY }
       
-      console.log('Camera moving - deltaX:', deltaX, 'deltaY:', deltaY, 'rotation:', cameraRotation.current) // 더 자세한 디버그
+      console.log('📱 Camera moving:', { deltaX, deltaY, newRotation: cameraRotation.current }) // 더 자세한 디버그
     }
 
     const handleTouchEnd = (event: TouchEvent) => {
@@ -108,7 +108,7 @@ export function MobileCameraControls({
 
   // 데스크톱용 마우스 조작
   useEffect(() => {
-    if (isMobile || !gl.domElement) return
+    if (isMobile) return
 
     const handleMouseMove = (event: MouseEvent) => {
       if (!isLocked) return
@@ -135,7 +135,7 @@ export function MobileCameraControls({
     return () => {
       document.removeEventListener('mousemove', handleMouseMove)
     }
-  }, [isMobile, isLocked, camera, gl.domElement])
+  }, [isMobile, isLocked, camera])
 
   return null
 }

@@ -77,7 +77,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
         className={isMobile ? 'back-button-mobile' : isTablet ? 'tablet-button' : ''}
         style={{
           position: 'absolute',
-          top: isMobile ? '10px' : '20px',
+          top: isMobile ? 'calc(10px + env(safe-area-inset-top))' : '20px',
           left: isMobile ? '10px' : '20px',
           zIndex: 1000,
           padding: isMobile ? '8px 12px' : '10px 18px',
@@ -118,7 +118,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
         className={isMobile ? 'info-panel-mobile' : isTablet ? 'info-panel-tablet' : ''}
         style={{
         position: 'absolute',
-        top: isMobile ? '10px' : '20px',
+        top: isMobile ? 'calc(10px + env(safe-area-inset-top))' : '20px',
         right: isMobile ? '10px' : '20px',
         left: isMobile ? '10px' : 'auto',
         background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(20, 20, 40, 0.6) 100%)',
@@ -171,7 +171,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
       {/* 온도 표시 - 반응형 디자인 */}
       <div style={{
         position: 'absolute',
-        bottom: isMobile ? '80px' : '20px', // 모바일에서 가상 조이스틱 공간 확보
+        bottom: isMobile ? 'calc(140px + env(safe-area-inset-bottom))' : '20px', // 모바일에서 가상 조이스틱 공간 확보
         left: isMobile ? '50%' : '20px',
         transform: isMobile ? 'translateX(-50%)' : 'none',
         background: 'linear-gradient(135deg, rgba(255, 69, 0, 0.8) 0%, rgba(255, 140, 0, 0.9) 100%)',
@@ -199,7 +199,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           style={{
           position: 'fixed',
           top: isMobile ? 'auto' : '50%',
-          bottom: isMobile ? '120px' : 'auto',
+          bottom: isMobile ? 'calc(160px + env(safe-area-inset-bottom))' : 'auto',
           left: isMobile ? '10px' : '50%',
           right: isMobile ? '10px' : 'auto',
           transform: isMobile ? 'none' : 'translate(-50%, -50%)',
@@ -413,7 +413,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           {/* 가상 조이스틱 */}
           <div style={{
             position: 'fixed',
-            bottom: '20px',
+            bottom: 'calc(20px + env(safe-area-inset-bottom))',
             left: '20px',
             zIndex: 1000,
             pointerEvents: 'auto'
@@ -428,7 +428,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           {/* 점프 버튼 */}
           <div style={{
             position: 'fixed',
-            bottom: '20px',
+            bottom: 'calc(20px + env(safe-area-inset-bottom))',
             right: '20px',
             zIndex: 1000,
             pointerEvents: 'auto'
@@ -446,7 +446,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           {!isLocked && (
             <div style={{
               position: 'fixed',
-              bottom: '120px',
+              bottom: 'calc(160px + env(safe-area-inset-bottom))',
               left: '50%',
               transform: 'translateX(-50%)',
               color: 'white',

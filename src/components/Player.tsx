@@ -133,7 +133,8 @@ export function Player({ position = [0, 2, 0], onPositionChange }: PlayerProps) 
   useEffect(() => {
     const unsubscribeVelocity = api.velocity.subscribe((v) => {
       velocity.current = v
-      setIsOnGround(Math.abs(v[1]) < 0.1) // Y축 속도가 거의 0이면 지면에 있음
+      // 지면 감지 개선: Y축 속도가 거의 0이고 아래쪽으로 떨어지지 않을 때
+      setIsOnGround(Math.abs(v[1]) < 0.5 && v[1] > -1)
     })
     const unsubscribePosition = api.position.subscribe((p) => {
       pos.current = p
@@ -173,12 +174,37 @@ export function Player({ position = [0, 2, 0], onPositionChange }: PlayerProps) 
     if (keys.current.right) moveDirection.add(right)
     if (keys.current.left) moveDirection.sub(right)
     
-    // 이동 속도 적용 (5 -> 12로 증가)
-    const moveSpeed = 50
+    // 이동 속도 적용
+    const moveSpeed = isOnGround ? 55 : 3 // 지면에서는 더 빠른 속도, 공중에서는 낮은 조작력
     moveDirection.multiplyScalar(moveSpeed)
     
-    // 수평 이동 적용
-    api.velocity.set(moveDirection.x, vy, moveDirection.z)
+    // 수평 이동 적용 - 공중에서는 현재 속도에 추가하는 방식
+    if (isOnGround) {
+      // 지면에서는 직접 속도 설정
+      api.velocity.set(moveDirection.x, vy, moveDirection.z)
+    } else {
+      // 공중에서는 이동 입력이 있을 때만 아주 작은 조작력 추가
+      if (moveDirection.length() > 0) {
+        const airControl = 0.02 // 공중 조작력을 더욱 줄임
+        const maxAirSpeed = 12 // 공중에서 최대 수평 속도를 더 제한
+        
+        const newVx = vx + moveDirection.x * airControl
+        const newVz = vz + moveDirection.z * airControl
+        
+        // 수평 속도 제한
+        const horizontalSpeed = Math.sqrt(newVx * newVx + newVz * newVz)
+        if (horizontalSpeed > maxAirSpeed) {
+          const ratio = maxAirSpeed / horizontalSpeed
+          api.velocity.set(newVx * ratio, vy, newVz * ratio)
+        } else {
+          api.velocity.set(newVx, vy, newVz)
+        }
+      } else {
+        // 이동 입력이 없으면 공기 저항 적용으로 속도 감소
+        const airResistance = 0.98
+        api.velocity.set(vx * airResistance, vy, vz * airResistance)
+      }
+    }
     
     // 점프 (지면에 있을 때만)
     if (keys.current.jump && isOnGround) {

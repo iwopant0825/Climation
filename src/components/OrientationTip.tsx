@@ -1,4 +1,5 @@
-import React from 'react';
+import React from 'react'
+import { MaterialIcon } from './MaterialIcon';
 
 interface OrientationTipProps {
   isMobile: boolean;
@@ -41,7 +42,7 @@ const OrientationTip: React.FC<OrientationTipProps> = ({
         justifyContent: 'center',
         marginBottom: '8px',
       }}>
-        <span style={{ fontSize: '16px', marginRight: '8px' }}>📱</span>
+        <MaterialIcon icon="screen_rotation" size={16} color="#007bff" style={{ marginRight: '8px' }} />
         <span>기기를 가로로 돌리면 더 넓은 화면으로 볼 수 있어요!</span>
       </div>
       <div style={{ fontSize: '10px', opacity: 0.8 }}>

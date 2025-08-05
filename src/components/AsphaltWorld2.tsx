@@ -4,6 +4,7 @@ import { Physics } from '@react-three/cannon'
 import { Environment, Sky } from '@react-three/drei'
 import { Player } from './Player'
 import { CityWithPhysics } from './CityWithPhysics'
+import { MaterialIcon } from './MaterialIcon'
 import * as THREE from 'three'
 
 interface AsphaltWorldProps {
@@ -49,7 +50,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           transition: 'all 0.3s ease',
         }}
       >
-        🌍 지구로 돌아가기
+        <MaterialIcon icon="public" size={16} color="white" /> 지구로 돌아가기
       </button>
 
       {/* 정보 패널 */}
@@ -65,12 +66,12 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
         zIndex: 1000,
         backdropFilter: 'blur(10px)',
       }}>
-        <h3 style={{ margin: '0 0 10px 0', color: '#ff4500' }}>🔥 아스팔트 열섬 현상</h3>
+        <h3 style={{ margin: '0 0 10px 0', color: '#ff4500' }}><MaterialIcon icon="local_fire_department" size={18} color="#ff4500" /> 아스팔트 열섬 현상</h3>
         <p style={{ margin: '0 0 8px 0', fontSize: '14px' }}>
           도시의 아스팔트와 콘크리트가 태양열을 흡수하여 주변보다 온도가 높아지는 현상입니다.
         </p>
         <div style={{ fontSize: '12px', color: '#ccc' }}>
-          💡 해결책: 녹지 확대, 쿨루프, 투수성 포장재 사용
+          <MaterialIcon icon="lightbulb" size={16} color="#ffd700" /> 해결책: 녹지 확대, 쿨루프, 투수성 포장재 사용
         </div>
       </div>
 
@@ -87,7 +88,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
         fontSize: '18px',
         fontWeight: 'bold',
       }}>
-        🌡️ 도심 온도: 38°C (+5°C ↑)
+        <MaterialIcon icon="device_thermostat" size={16} color="#ff4444" /> 도심 온도: 38°C (+5°C ↑)
       </div>
 
       {/* 클릭 안내 UI */}

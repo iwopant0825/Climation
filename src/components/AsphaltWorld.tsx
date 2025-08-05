@@ -6,6 +6,7 @@ import { Player } from './Player'
 import { CityWithPhysics } from './CityWithPhysics'
 import { VirtualJoystick, JumpButton } from './VirtualJoystick'
 import { MobileCameraControls } from './MobileCameraControls'
+import { MaterialIcon } from './MaterialIcon'
 import * as THREE from 'three'
 
 interface AsphaltWorldProps {
@@ -40,6 +41,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
   const [showTemperatureAnimation, setShowTemperatureAnimation] = React.useState(false)
   const [animatedTemperature, setAnimatedTemperature] = React.useState(45)
   const normalTemperature = 25 // 목표 정상 온도
+  const [isTemperatureGoalAchieved, setIsTemperatureGoalAchieved] = React.useState(false)
 
   // 기기 타입 감지
   React.useEffect(() => {
@@ -108,6 +110,14 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
       }
     }
   }, [isLocked, showEducationPopup, isMobile, selectedTechnology, playerPosition, paintedAreas, targetTemperature, normalTemperature])
+
+  // 온도 목표 달성 체크
+  React.useEffect(() => {
+    if (targetTemperature <= normalTemperature && !isTemperatureGoalAchieved) {
+      setIsTemperatureGoalAchieved(true)
+      console.log('온도 목표 달성! 환경이 개선됩니다.')
+    }
+  }, [targetTemperature, normalTemperature, isTemperatureGoalAchieved])
 
   // 차열페인트 체험 모드 활성화
   React.useEffect(() => {
@@ -469,7 +479,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
                     color: '#00ff88',
                     fontWeight: 'bold'
                   }}>
-                    🌡️ 주요 효과: 표면온도 15°C 감소 | 태양열 반사 80% | 에너지 절약 25%
+                    <MaterialIcon icon="device_thermostat" size={16} color="#00ff88" /> 주요 효과: 표면온도 15°C 감소 | 태양열 반사 80% | 에너지 절약 25%
                   </div>
                   {selectedTechnology === 'heatpaint' && (
                     <div style={{
@@ -767,7 +777,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             textShadow: '0 0 8px rgba(0, 255, 136, 0.8)',
             animation: 'pulse 2s ease-in-out infinite'
           }}>
-            🎉 정상 온도 달성!
+            <MaterialIcon icon="celebration" size={20} color="#00ff88" /> 정상 온도 달성!
           </div>
         )}
         
@@ -823,12 +833,12 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             backdropFilter: 'blur(20px)',
             maxWidth: isMobile ? '85%' : '500px'
           }}>
-            🎉🌡️ 미션 완료! 🌡️🎉<br/>
+            <MaterialIcon icon="celebration" size={18} color="#00ff88" /><MaterialIcon icon="device_thermostat" size={18} color="#00ff88" /> 미션 완료! <MaterialIcon icon="device_thermostat" size={18} color="#00ff88" /><MaterialIcon icon="celebration" size={18} color="#00ff88" /><br/>
             <span style={{ fontSize: isMobile ? '14px' : '18px', color: '#e6ffe6' }}>
               도시 온도를 정상 수준({normalTemperature}°C)까지 낮췄습니다!
             </span><br/>
             <span style={{ fontSize: isMobile ? '12px' : '16px', color: '#ccffcc' }}>
-              차열페인트로 열섬현상을 완화시켰어요! 🏆
+              차열페인트로 열섬현상을 완화시켰어요! <MaterialIcon icon="trophy" size={18} color="#ffd700" />
             </span>
           </div>
         </div>
@@ -859,7 +869,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           textShadow: '0 0 10px rgba(255, 255, 255, 0.8)',
           animation: 'pulse 1s ease-in-out infinite'
         }}>
-          ⚠️ {isMobile ? '맵 경계 도달!' : '맵 경계에 도달했습니다!'} ⚠️<br/>
+          <MaterialIcon icon="warning" size={16} color="#ff6b47" /> {isMobile ? '맵 경계 도달!' : '맵 경계에 도달했습니다!'} <MaterialIcon icon="warning" size={16} color="#ff6b47" /><br/>
           <span style={{ fontSize: isMobile ? '14px' : '16px', color: '#ffcccc' }}>
             {isMobile ? '곧 시작점으로 이동' : '곧 시작점으로 돌아갑니다.'}
           </span>
@@ -896,7 +906,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
               marginBottom: '12px',
               textShadow: '0 0 15px rgba(0, 255, 136, 0.8)'
             }}>
-              {isMobile ? '🎮 1인칭 모드 활성화됨!' : '화면을 클릭하여 1인칭 모드로 진입하세요'}
+              {isMobile ? <><MaterialIcon icon="videogame_asset" size={14} color="#fd79a8" /> 1인칭 모드 활성화됨!</> : '화면을 클릭하여 1인칭 모드로 진입하세요'}
             </div>
             <div style={{ 
               fontSize: isMobile ? '12px' : '14px', 
@@ -906,9 +916,9 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
               {isMobile ? (
                 <>
                   <span style={{color: '#74b9ff'}}>👆 화면 드래그</span>: 시점 조작 (조이스틱 외 영역)<br/>
-                  <span style={{color: '#fd79a8'}}>🕹️ 가상패드</span>: 이동 | 
+                  <span style={{color: '#fd79a8'}}><MaterialIcon icon="gamepad" size={14} color="#fd79a8" /> 가상패드</span>: 이동 | 
                   <span style={{color: '#fdcb6e'}}> 🔘 버튼</span>: 점프<br/>
-                  <span style={{color: '#a29bfe', fontSize: '11px'}}>💡 조이스틱과 시점 조작을 동시에 사용 가능!</span>
+                  <span style={{color: '#a29bfe', fontSize: '11px'}}><MaterialIcon icon="lightbulb" size={11} color="#a29bfe" /> 조이스틱과 시점 조작을 동시에 사용 가능!</span>
                 </>
               ) : (
                 <>
@@ -982,13 +992,17 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           stepSize={isMobile ? 1/30 : 1/60} // 모바일에서 물리 계산 빈도 감소
           maxSubSteps={isMobile ? 3 : 5} // 모바일에서 반복 계산 감소
         >
-                    {/* 뿌옇고 탁한 스모그 조명 설정 - 열섬 현상용 */}
-          <ambientLight intensity={0.3} color="#ddd8aa" />
+          {/* 뿌옇고 탁한 스모그 조명 설정 - 열섬 현상용 / 온도 목표 달성 시 맑은 조명 */}
+          <ambientLight 
+            intensity={isTemperatureGoalAchieved ? 0.6 : 0.3} 
+            color={isTemperatureGoalAchieved ? "#ffffff" : "#ddd8aa"} 
+          />
           
-          {/* 스모그에 가려진 약한 태양 조명 */}
+          {/* 스모그에 가려진 약한 태양 조명 / 온도 목표 달성 시 밝은 태양 조명 */}
           <directionalLight
             position={[50, 50, 50]}
-            intensity={0.9}
+            intensity={isTemperatureGoalAchieved ? 1.8 : 0.9}
+            color={isTemperatureGoalAchieved ? "#ffffff" : "#ffeeaa"}
             castShadow
             shadow-mapSize-width={4096}
             shadow-mapSize-height={4096}
@@ -1000,40 +1014,39 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             shadow-bias={-0.001}
             shadow-normalBias={0.02}
             shadow-radius={1}
-            color="#ddcc88"
           />
           
-          {/* 뿌연 대기 중의 산란광 */}
+          {/* 뿌연 대기 중의 산란광 / 온도 목표 달성 시 맑은 산란광 */}
           <pointLight
             position={[0, 20, 0]}
-            intensity={0.4}
-            color="#ccaa77"
+            intensity={isTemperatureGoalAchieved ? 0.7 : 0.4}
+            color={isTemperatureGoalAchieved ? "#ffffff" : "#ccaa77"}
             distance={100}
             decay={1}
           />
           
-          {/* 탁하고 뿌연 하늘 조명 */}
+          {/* 탁하고 뿌연 하늘 조명 / 온도 목표 달성 시 맑은 하늘 조명 */}
           <hemisphereLight
-            args={["#bbaa88", "#ddcc99", 0.4]}
+            args={isTemperatureGoalAchieved ? ["#87ceeb", "#ffffff", 0.7] : ["#bbaa88", "#ddcc99", 0.4]}
           />
           
-          {/* 추가 확산된 조명 */}
+          {/* 추가 확산된 조명 / 온도 목표 달성 시 더 밝은 조명 */}
           <directionalLight
             position={[30, 40, 30]}
-            intensity={0.3}
-            color="#ccbb77"
+            intensity={isTemperatureGoalAchieved ? 0.6 : 0.3}
+            color={isTemperatureGoalAchieved ? "#ffffff" : "#ccbb77"}
           />
           
-          {/* 뿌옇고 탁한 스모그 하늘 - 열섬 현상 효과 */}
+          {/* 뿌옇고 탁한 스모그 하늘 - 열섬 현상 효과 / 온도 목표 달성 시 맑은 하늘 */}
           <Sky
             distance={450000}
-            sunPosition={[1, 0.4, 0]}
-            inclination={0.4}
+            sunPosition={isTemperatureGoalAchieved ? [1, 0.7, 0] : [1, 0.4, 0]}
+            inclination={isTemperatureGoalAchieved ? 0.6 : 0.4}
             azimuth={0.25}
-            turbidity={25}
-            rayleigh={1.2}
-            mieCoefficient={0.03}
-            mieDirectionalG={0.95}
+            turbidity={isTemperatureGoalAchieved ? 3 : 25}
+            rayleigh={isTemperatureGoalAchieved ? 3 : 1.2}
+            mieCoefficient={isTemperatureGoalAchieved ? 0.005 : 0.03}
+            mieDirectionalG={isTemperatureGoalAchieved ? 0.7 : 0.95}
           />
 
           {/* 도시 모델 - 그림자 강화 */}
@@ -1059,8 +1072,8 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
               />
             </group>
             
-            {/* 뜨거운 아스팔트에서 올라오는 열기 파티클 */}
-            <HeatWaves />
+            {/* 뜨거운 아스팔트에서 올라오는 열기 파티클 - 온도 목표 달성 시 제거 */}
+            {!isTemperatureGoalAchieved && <HeatWaves />}
             
             {/* 차열페인트가 칠해진 영역들 */}
             {paintedAreas.map((area, index) => (
@@ -1137,12 +1150,12 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           animation: 'fadeIn 0.5s ease-in-out',
           maxWidth: isMobile ? '85%' : '400px'
         }}>
-          🎨 차열페인트를 칠했습니다! 🎨<br/>
+          <MaterialIcon icon="format_paint" size={18} color="#00ff88" /> 차열페인트를 칠했습니다! <MaterialIcon icon="format_paint" size={18} color="#00ff88" /><br/>
           <span style={{ fontSize: isMobile ? '11px' : '13px', color: '#e6ffe6' }}>
-            🌡️ 도시 온도가 {Math.abs(temperatureChange)}°C 감소했습니다!
+            <MaterialIcon icon="device_thermostat" size={14} color="#00ff88" /> 도시 온도가 {Math.abs(temperatureChange)}°C 감소했습니다!
           </span><br/>
           <span style={{ fontSize: isMobile ? '10px' : '12px', color: '#ccffcc' }}>
-            {isMobile ? '🎨 버튼으로 더 칠하기' : 'F키를 눌러 더 많은 곳에 칠하세요'}
+            {isMobile ? <><MaterialIcon icon="format_paint" size={12} color="#e6ffe6" /> 버튼으로 더 칠하기</> : 'F키를 눌러 더 많은 곳에 칠하세요'}
           </span>
         </div>
       )}
@@ -1167,7 +1180,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           boxShadow: '0 4px 20px rgba(0, 255, 136, 0.3)',
           maxWidth: isMobile ? '85%' : '300px'
         }}>
-          🎨 {isMobile ? '바닥을 터치하여 차열페인트 칠하기' : 'F키를 눌러 바닥에 차열페인트를 칠하세요'}
+          <MaterialIcon icon="format_paint" size={16} color="#00ff88" /> {isMobile ? '바닥을 터치하여 차열페인트 칠하기' : 'F키를 눌러 바닥에 차열페인트를 칠하세요'}
           <br/>
           <small style={{ color: '#88ffaa', fontSize: '10px' }}>
             칠해진 영역: {paintedAreas.length}개
@@ -1304,7 +1317,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
                   textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
                   marginBottom: '2px'
                 }}>
-                  🎨
+                  <MaterialIcon icon="format_paint" size={20} color="white" />
                 </span>
                 <span style={{
                   fontSize: 8,
@@ -1337,7 +1350,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
               maxWidth: '80%',
               border: '1px solid rgba(255, 255, 255, 0.3)'
             }}>
-              📱 좌측: 이동 | 우측: 점프
+              <MaterialIcon icon="smartphone" size={12} color="white" /> 좌측: 이동 | 우측: 점프
             </div>
           )}
         </>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { MaterialIcon } from './MaterialIcon';
 
 const ControlsHelp: React.FC = () => {
   return (
@@ -16,9 +17,9 @@ const ControlsHelp: React.FC = () => {
       maxWidth: '90vw', // 모바일에서 화면 넘침 방지
       boxSizing: 'border-box',
     }}>
-      <div>🖱️ 터치/마우스로 지구 회전</div>
-      <div>🔍 핀치/휠로 확대/축소</div>
-      <div>🌍 지구 위 핀을 터치/클릭하여 탐험 시작</div>
+      <div><MaterialIcon icon="mouse" size={16} color="#007bff" /> 터치/마우스로 지구 회전</div>
+      <div><MaterialIcon icon="zoom_in" size={16} color="#007bff" /> 핀치/휠로 확대/축소</div>
+      <div><MaterialIcon icon="public" size={16} color="#007bff" /> 지구 위 핀을 터치/클릭하여 탐험 시작</div>
     </div>
   );
 };

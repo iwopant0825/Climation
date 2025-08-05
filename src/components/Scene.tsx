@@ -4,6 +4,7 @@ import { Stars } from './Stars'
 import { CameraControls } from './CameraControls'
 import RotatingEarth from './RotatingEarth'
 import { AsphaltWorld } from './AsphaltWorld'
+import { MaterialIcon } from './MaterialIcon'
 
 export function Scene() {
   const [showTitle, setShowTitle] = useState(true)
@@ -319,18 +320,18 @@ export function Scene() {
             color: '#00ff88',
             fontSize: isMobile ? '13px' : '15px'
           }}>
-            🎮 조작법
+            <MaterialIcon icon="sports_esports" size={16} color="#00ff88" /> 조작법
           </div>
           <div style={{ marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ color: '#0088ff' }}>🖱️</span>
+            <span style={{ color: '#0088ff' }}><MaterialIcon icon="mouse" size={16} color="#0088ff" /></span>
             <span>{isMobile || isTablet ? '터치로 지구 회전' : '마우스로 지구 회전'}</span>
           </div>
           <div style={{ marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ color: '#ff8800' }}>🔍</span>
+            <span style={{ color: '#ff8800' }}><MaterialIcon icon="zoom_in" size={16} color="#ff8800" /></span>
             <span>{isMobile || isTablet ? '핀치로 확대/축소' : '휠로 확대/축소'}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ color: '#ff4444' }}>🌍</span>
+            <span style={{ color: '#ff4444' }}><MaterialIcon icon="public" size={16} color="#ff4444" /></span>
             <span>{isMobile || isTablet ? '핀을 터치하여 탐험' : '핀을 클릭하여 탐험'}</span>
           </div>
         </div>
@@ -402,7 +403,7 @@ export function Scene() {
               marginBottom: '16px',
               filter: 'grayscale(0.3)',
             }}>
-              🚧
+              <MaterialIcon icon="construction" size={64} color="#ffaa00" />
             </div>
             
             <h2 style={{
@@ -423,7 +424,7 @@ export function Scene() {
             }}>
               <strong style={{ color: '#ffaa00' }}>아직 개발중입니다!</strong><br/>
               더 나은 기후 위기 교육 경험을 위해<br/>
-              열심히 개발하고 있어요 🌍
+              열심히 개발하고 있어요 <MaterialIcon icon="public" size={16} color="#ffffff" />
             </p>
             
             <div style={{
@@ -435,8 +436,8 @@ export function Scene() {
               fontSize: isMobile ? '13px' : '14px',
               color: 'rgba(255, 255, 255, 0.8)',
             }}>
-              💡 <strong>현재 이용 가능:</strong> 도시 열섬 현상 메타버스<br/>
-              🔜 <strong>곧 출시:</strong> {selectedCrisis} 관련 콘텐츠
+              <MaterialIcon icon="lightbulb" size={16} color="#ffaa00" /> <strong>현재 이용 가능:</strong> 도시 열섬 현상 메타버스<br/>
+              <MaterialIcon icon="upcoming" size={16} color="#00ff88" /> <strong>곧 출시:</strong> {selectedCrisis} 관련 콘텐츠
             </div>
             
             <button

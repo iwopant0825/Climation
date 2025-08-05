@@ -33,6 +33,14 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
   const [showInteractionHint, setShowInteractionHint] = React.useState(false)
   const [playerPosition, setPlayerPosition] = React.useState<[number, number, number]>([0, 2, 0])
 
+  // 온도계 시스템 상태
+  const [cityTemperature, setCityTemperature] = React.useState(45) // 초기 온도 45°C
+  const [targetTemperature, setTargetTemperature] = React.useState(45)
+  const [temperatureChange, setTemperatureChange] = React.useState(0) // 온도 변화량
+  const [showTemperatureAnimation, setShowTemperatureAnimation] = React.useState(false)
+  const [animatedTemperature, setAnimatedTemperature] = React.useState(45)
+  const normalTemperature = 25 // 목표 정상 온도
+
   // 기기 타입 감지
   React.useEffect(() => {
     const checkDeviceType = () => {
@@ -75,6 +83,17 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           setPaintedAreas(prev => [...prev, newPaintArea])
           setShowInteractionHint(true)
           setTimeout(() => setShowInteractionHint(false), 2000)
+          
+          // 온도 감소 효과 (1-3도 랜덤 감소)
+          const tempDecrease = Math.floor(Math.random() * 3) + 1 // 1-3도 랜덤
+          const newTemperature = Math.max(normalTemperature, targetTemperature - tempDecrease)
+          
+          setTemperatureChange(-tempDecrease)
+          setTargetTemperature(newTemperature)
+          setShowTemperatureAnimation(true)
+          
+          // 애니메이션 후 숨기기
+          setTimeout(() => setShowTemperatureAnimation(false), 3000)
         }
       }
     }
@@ -88,7 +107,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
         document.removeEventListener('keydown', handleKeyPress)
       }
     }
-  }, [isLocked, showEducationPopup, isMobile, selectedTechnology, playerPosition, paintedAreas])
+  }, [isLocked, showEducationPopup, isMobile, selectedTechnology, playerPosition, paintedAreas, targetTemperature, normalTemperature])
 
   // 차열페인트 체험 모드 활성화
   React.useEffect(() => {
@@ -101,6 +120,38 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
       }
     }
   }, [selectedTechnology, showEducationPopup, isMobile])
+
+  // 온도 애니메이션 효과
+  React.useEffect(() => {
+    if (targetTemperature !== cityTemperature) {
+      const animationDuration = 2000 // 2초
+      const startTime = Date.now()
+      const startTemp = cityTemperature
+      const tempDiff = targetTemperature - startTemp
+      
+      const animate = () => {
+        const elapsed = Date.now() - startTime
+        const progress = Math.min(elapsed / animationDuration, 1)
+        
+        // 이징 함수 (easeOutCubic)
+        const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
+        const easedProgress = easeOutCubic(progress)
+        
+        const currentTemp = startTemp + (tempDiff * easedProgress)
+        setAnimatedTemperature(Math.round(currentTemp * 10) / 10) // 소수점 1자리
+        setCityTemperature(currentTemp)
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate)
+        } else {
+          setCityTemperature(targetTemperature)
+          setAnimatedTemperature(targetTemperature)
+        }
+      }
+      
+      requestAnimationFrame(animate)
+    }
+  }, [targetTemperature, cityTemperature])
 
   // 플레이어 위치 변경 핸들러
   const handlePlayerPositionChange = React.useCallback((position: [number, number, number]) => {
@@ -604,16 +655,21 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             overflow: 'hidden',
             zIndex: 2
           }}>
-            {/* 온도 표시 바 (38°C = 76% 정도) */}
+            {/* 온도 표시 바 - 동적 계산 */}
             <div style={{
               position: 'absolute',
               bottom: 0,
               width: '100%',
-              height: '76%', // 38°C 기준 (50°C 만점으로 가정)
-              background: 'linear-gradient(to top, #ff4444 0%, #ff6b35 40%, #ffa500 80%, #ffff00 100%)',
-              borderRadius: '4px 4px 0 0', // 상단만 둥글게
-              animation: 'heatPulse 2s ease-in-out infinite',
-              boxShadow: 'inset 0 0 10px rgba(255, 255, 255, 0.3)'
+              height: `${Math.max(10, Math.min(100, ((animatedTemperature - 15) / (50 - 15)) * 100))}%`, // 15-50°C 범위로 정규화
+              background: animatedTemperature > 35 
+                ? 'linear-gradient(to top, #ff4444 0%, #ff6b35 40%, #ffa500 80%, #ffff00 100%)'
+                : animatedTemperature > 30
+                ? 'linear-gradient(to top, #ff6b35 0%, #ffa500 50%, #ffff00 100%)'
+                : 'linear-gradient(to top, #00ff88 0%, #44ff44 50%, #88ff00 100%)', // 정상 온도 시 녹색
+              borderRadius: '4px 4px 0 0',
+              animation: animatedTemperature > normalTemperature ? 'heatPulse 2s ease-in-out infinite' : 'none',
+              boxShadow: 'inset 0 0 10px rgba(255, 255, 255, 0.3)',
+              transition: 'all 0.5s ease-out'
             }} />
             
             {/* 온도계 눈금 */}
@@ -631,45 +687,139 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             ))}
           </div>
           
-          {/* 온도계 구부 (막대와 연결) */}
+          {/* 온도계 구부 (막대와 연결) - 동적 색상 */}
           <div style={{
             width: isMobile ? '20px' : '24px',
             height: isMobile ? '20px' : '24px',
             borderRadius: '50%',
-            background: 'linear-gradient(135deg, #ff4444 0%, #ff6b35 100%)',
+            background: animatedTemperature > 35 
+              ? 'linear-gradient(135deg, #ff4444 0%, #ff6b35 100%)'
+              : animatedTemperature > 30
+              ? 'linear-gradient(135deg, #ff6b35 0%, #ffa500 100%)'
+              : 'linear-gradient(135deg, #00ff88 0%, #44ff44 100%)', // 정상 온도 시 녹색
             border: '2px solid rgba(255, 255, 255, 0.3)',
-            marginTop: '-2px', // 막대와 겹치도록
-            boxShadow: '0 0 15px rgba(255, 68, 68, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
-            animation: 'tempPulse 2s ease-in-out infinite',
-            zIndex: 1
+            marginTop: '-2px',
+            boxShadow: animatedTemperature > normalTemperature 
+              ? '0 0 15px rgba(255, 68, 68, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3)'
+              : '0 0 15px rgba(0, 255, 136, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
+            animation: animatedTemperature > normalTemperature ? 'tempPulse 2s ease-in-out infinite' : 'none',
+            zIndex: 1,
+            transition: 'all 0.5s ease-out'
           }} />
         </div>
         
-        {/* 온도 수치 */}
+        {/* 온도 수치 - 동적 업데이트 */}
         <div style={{
           fontSize: isMobile ? '16px' : '20px',
           fontWeight: 'bold',
-          color: '#ff6b35',
-          textShadow: '0 0 10px rgba(255, 107, 53, 0.8)',
-          marginBottom: '4px'
+          color: animatedTemperature > normalTemperature ? '#ff6b35' : '#00ff88',
+          textShadow: animatedTemperature > normalTemperature 
+            ? '0 0 10px rgba(255, 107, 53, 0.8)' 
+            : '0 0 10px rgba(0, 255, 136, 0.8)',
+          marginBottom: '4px',
+          transition: 'all 0.5s ease-out'
         }}>
-          38°C
+          {Math.round(animatedTemperature)}°C
         </div>
         
-        {/* 상승 표시 */}
+        {/* 온도 변화 표시 - 동적 */}
         <div style={{
           fontSize: isMobile ? '10px' : '12px',
-          color: '#ffff99',
+          color: temperatureChange < 0 ? '#00ff88' : '#ffff99', // 감소시 녹색, 증가시 노란색
           fontWeight: 'bold',
-          textShadow: '0 0 8px rgba(255, 255, 153, 0.8)',
+          textShadow: temperatureChange < 0 
+            ? '0 0 8px rgba(0, 255, 136, 0.8)' 
+            : '0 0 8px rgba(255, 255, 153, 0.8)',
           display: 'flex',
           alignItems: 'center',
-          gap: '2px'
+          gap: '2px',
+          opacity: showTemperatureAnimation ? 1 : 0.7,
+          transform: showTemperatureAnimation ? 'scale(1.1)' : 'scale(1)',
+          transition: 'all 0.3s ease-out'
         }}>
-          <span style={{ fontSize: isMobile ? '12px' : '14px' }}>↑</span>
-          +5°C
+          <span style={{ fontSize: isMobile ? '12px' : '14px' }}>
+            {temperatureChange < 0 ? '↓' : '↑'}
+          </span>
+          {temperatureChange < 0 ? temperatureChange : `+${temperatureChange}`}°C
         </div>
+        
+        {/* 목표 달성 메시지 */}
+        {animatedTemperature <= normalTemperature && (
+          <div style={{
+            fontSize: isMobile ? '8px' : '10px',
+            color: '#00ff88',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            marginTop: '5px',
+            textShadow: '0 0 8px rgba(0, 255, 136, 0.8)',
+            animation: 'pulse 2s ease-in-out infinite'
+          }}>
+            🎉 정상 온도 달성!
+          </div>
+        )}
+        
+        {/* 플로팅 온도 변화 애니메이션 */}
+        {showTemperatureAnimation && (
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '120%',
+            transform: 'translateY(-50%)',
+            fontSize: isMobile ? '14px' : '16px',
+            fontWeight: 'bold',
+            color: temperatureChange < 0 ? '#00ff88' : '#ff6b35',
+            textShadow: temperatureChange < 0 
+              ? '0 0 10px rgba(0, 255, 136, 1)' 
+              : '0 0 10px rgba(255, 107, 53, 1)',
+            animation: 'floatUp 3s ease-out forwards',
+            zIndex: 1002,
+            pointerEvents: 'none'
+          }}>
+            {temperatureChange < 0 ? temperatureChange : `+${temperatureChange}`}°C
+          </div>
+        )}
       </div>
+
+      {/* 목표 온도 달성 시 전체 화면 축하 메시지 */}
+      {animatedTemperature <= normalTemperature && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0, 255, 136, 0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          pointerEvents: 'none',
+          animation: 'successPulse 3s ease-in-out infinite'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.95) 0%, rgba(0, 200, 100, 0.9) 100%)',
+            color: 'white',
+            padding: isMobile ? '20px' : '30px',
+            borderRadius: '20px',
+            textAlign: 'center',
+            fontSize: isMobile ? '18px' : '24px',
+            fontWeight: 'bold',
+            textShadow: '0 0 15px rgba(255, 255, 255, 0.8)',
+            boxShadow: '0 15px 50px rgba(0, 255, 136, 0.6)',
+            border: '3px solid rgba(255, 255, 255, 0.5)',
+            backdropFilter: 'blur(20px)',
+            maxWidth: isMobile ? '85%' : '500px'
+          }}>
+            🎉🌡️ 미션 완료! 🌡️🎉<br/>
+            <span style={{ fontSize: isMobile ? '14px' : '18px', color: '#e6ffe6' }}>
+              도시 온도를 정상 수준({normalTemperature}°C)까지 낮췄습니다!
+            </span><br/>
+            <span style={{ fontSize: isMobile ? '12px' : '16px', color: '#ccffcc' }}>
+              차열페인트로 열섬현상을 완화시켰어요! 🏆
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* 경계 경고 UI - 반응형 */}
       {showBoundaryWarning && (
@@ -963,8 +1113,11 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           maxWidth: isMobile ? '85%' : '400px'
         }}>
           🎨 차열페인트를 칠했습니다! 🎨<br/>
-          <span style={{ fontSize: isMobile ? '12px' : '14px', color: '#e6ffe6' }}>
-            {isMobile ? '터치로 더 칠하기' : 'F키를 눌러 더 많은 곳에 칠하세요'}
+          <span style={{ fontSize: isMobile ? '11px' : '13px', color: '#e6ffe6' }}>
+            🌡️ 도시 온도가 {Math.abs(temperatureChange)}°C 감소했습니다!
+          </span><br/>
+          <span style={{ fontSize: isMobile ? '10px' : '12px', color: '#ccffcc' }}>
+            {isMobile ? '🎨 버튼으로 더 칠하기' : 'F키를 눌러 더 많은 곳에 칠하세요'}
           </span>
         </div>
       )}
@@ -1084,6 +1237,21 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
                     setPaintedAreas(prev => [...prev, newPaintArea])
                     setShowInteractionHint(true)
                     setTimeout(() => setShowInteractionHint(false), 2000)
+                    
+                    // 온도 감소 효과 (모바일에서도 동일하게 적용)
+                    const tempDecrease = Math.floor(Math.random() * 3) + 1 // 1-3도 랜덤
+                    const newTemperature = Math.max(normalTemperature, targetTemperature - tempDecrease)
+                    
+                    setTemperatureChange(-tempDecrease)
+                    setTargetTemperature(newTemperature)
+                    setShowTemperatureAnimation(true)
+                    
+                    // 애니메이션 후 숨기기
+                    setTimeout(() => setShowTemperatureAnimation(false), 3000)
+                  } else {
+                    // 중복 위치일 때 힌트 표시
+                    setShowInteractionHint(true)
+                    setTimeout(() => setShowInteractionHint(false), 1000)
                   }
                 }}
                 style={{
@@ -1095,6 +1263,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
                   backdropFilter: 'blur(10px)',
                   boxShadow: '0 4px 16px rgba(77, 166, 255, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
                   userSelect: 'none',
@@ -1104,12 +1273,23 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
                 }}
               >
                 <span style={{
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: 'bold',
                   color: 'white',
-                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+                  marginBottom: '2px'
                 }}>
                   🎨
+                </span>
+                <span style={{
+                  fontSize: 8,
+                  fontWeight: 'bold',
+                  color: 'white',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+                  textAlign: 'center',
+                  lineHeight: '1'
+                }}>
+                  온도↓
                 </span>
               </div>
             </div>
@@ -1223,4 +1403,67 @@ function HeatWaves() {
       />
     </points>
   )
+}
+
+// CSS 애니메이션을 위한 스타일 추가
+const style = document.createElement('style')
+if (!document.head.querySelector('#temperature-animations')) {
+  style.id = 'temperature-animations'
+  style.textContent = `
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+      }
+      50% {
+        opacity: 0.8;
+        transform: translateY(-80%) translateX(20px);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-120%) translateX(40px);
+      }
+    }
+    
+    @keyframes heatPulse {
+      0%, 100% {
+        box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3);
+      }
+      50% {
+        box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5), 0 0 15px rgba(255, 68, 68, 0.8);
+      }
+    }
+    
+    @keyframes tempPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(255, 68, 68, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 25px rgba(255, 68, 68, 0.9), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+      }
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.05);
+      }
+    }
+    
+    @keyframes successPulse {
+      0%, 100% {
+        background: rgba(0, 255, 136, 0.05);
+      }
+      50% {
+        background: rgba(0, 255, 136, 0.15);
+      }
+    }
+  `
+  document.head.appendChild(style)
 }

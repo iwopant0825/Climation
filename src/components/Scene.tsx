@@ -3,17 +3,24 @@ import { Canvas } from '@react-three/fiber'
 import { Stars } from './Stars'
 import { CameraControls } from './CameraControls'
 import RotatingEarth from './RotatingEarth'
+import { AsphaltWorld } from './AsphaltWorld'
 
 export function Scene() {
   const [showTitle, setShowTitle] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
   const [isTablet, setIsTablet] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [currentWorld, setCurrentWorld] = useState<'earth' | 'asphalt'>('earth')
 
   // 기후 위기 핸들러
   const handleAsphaltCrisis = () => {
     console.log('아스팔트 위기 탐험!')
-    // 여기에 아스팔트 위기 관련 로직 추가
+    setCurrentWorld('asphalt')
+  }
+
+  const handleBackToEarth = () => {
+    console.log('지구로 돌아가기')
+    setCurrentWorld('earth')
   }
 
   const handleOtherCrisis = (type: string) => {
@@ -53,6 +60,11 @@ export function Scene() {
       clearTimeout(titleTimer)
     }
   }, [])
+
+  // 아스팔트 세계인 경우 별도 렌더링
+  if (currentWorld === 'asphalt') {
+    return <AsphaltWorld onBackToEarth={handleBackToEarth} />
+  }
 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}>

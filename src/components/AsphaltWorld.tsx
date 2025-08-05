@@ -26,6 +26,12 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
   // 교육 팝업 상태
   const [showEducationPopup, setShowEducationPopup] = React.useState(true)
   const [selectedTechnology, setSelectedTechnology] = React.useState<string | null>(null)
+  
+  // 차열페인트 상호작용 상태
+  const [isInteractionMode, setIsInteractionMode] = React.useState(false)
+  const [paintedAreas, setPaintedAreas] = React.useState<Array<{x: number, z: number, radius: number}>>([])
+  const [showInteractionHint, setShowInteractionHint] = React.useState(false)
+  const [playerPosition, setPlayerPosition] = React.useState<[number, number, number]>([0, 2, 0])
 
   // 기기 타입 감지
   React.useEffect(() => {
@@ -48,9 +54,59 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
     }
   }, [])
 
+  // F키 상호작용 핸들링
+  React.useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // event.code를 사용하여 키보드 언어에 상관없이 물리적 F키 인식
+      if (event.code === 'KeyF' && isLocked && !showEducationPopup && selectedTechnology === 'heatpaint') {
+        // 현재 플레이어 위치에 차열페인트 적용
+        const newPaintArea = { 
+          x: Math.round(playerPosition[0]), 
+          z: Math.round(playerPosition[2]), 
+          radius: 2 
+        }
+        
+        // 중복 위치 확인 후 추가
+        const isDuplicate = paintedAreas.some(area => 
+          Math.abs(area.x - newPaintArea.x) < 1.5 && Math.abs(area.z - newPaintArea.z) < 1.5
+        )
+        
+        if (!isDuplicate) {
+          setPaintedAreas(prev => [...prev, newPaintArea])
+          setShowInteractionHint(true)
+          setTimeout(() => setShowInteractionHint(false), 2000)
+        }
+      }
+    }
+
+    if (!isMobile) {
+      document.addEventListener('keydown', handleKeyPress)
+    }
+
+    return () => {
+      if (!isMobile) {
+        document.removeEventListener('keydown', handleKeyPress)
+      }
+    }
+  }, [isLocked, showEducationPopup, isMobile, selectedTechnology, playerPosition, paintedAreas])
+
+  // 차열페인트 체험 모드 활성화
+  React.useEffect(() => {
+    if (selectedTechnology === 'heatpaint' && !showEducationPopup) {
+      setIsInteractionMode(true)
+      // 모바일에서는 자동으로 힌트 표시
+      if (isMobile) {
+        setShowInteractionHint(true)
+        setTimeout(() => setShowInteractionHint(false), 5000)
+      }
+    }
+  }, [selectedTechnology, showEducationPopup, isMobile])
+
   // 플레이어 위치 변경 핸들러
   const handlePlayerPositionChange = React.useCallback((position: [number, number, number]) => {
     const [x, , z] = position
+    setPlayerPosition(position) // 플레이어 위치 상태 업데이트
+    
     const mapBoundary = 35 // 경고 표시용 경계 (실제 경계보다 작게)
     
     if (Math.abs(x) > mapBoundary || Math.abs(z) > mapBoundary) {
@@ -311,16 +367,16 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
                   </div>
                 </div>
 
-                {/* 투수성 포장재 - 체험 가능 */}
+                {/* 차열페인트 - 체험 가능 */}
                 <div 
-                  onClick={() => setSelectedTechnology('permeable')}
+                  onClick={() => setSelectedTechnology('heatpaint')}
                   style={{
-                    background: selectedTechnology === 'permeable' 
+                    background: selectedTechnology === 'heatpaint' 
                       ? 'rgba(0, 255, 136, 0.2)' 
                       : 'rgba(255, 255, 255, 0.05)',
                     padding: '15px',
                     borderRadius: '10px',
-                    border: selectedTechnology === 'permeable' 
+                    border: selectedTechnology === 'heatpaint' 
                       ? '2px solid rgba(0, 255, 136, 0.8)' 
                       : '1px solid rgba(255, 255, 255, 0.1)',
                     cursor: 'pointer',
@@ -329,11 +385,11 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
                   }}
                 >
                   <h4 style={{ 
-                    color: selectedTechnology === 'permeable' ? '#00ff88' : '#88ddff', 
+                    color: selectedTechnology === 'heatpaint' ? '#00ff88' : '#88ddff', 
                     marginBottom: '8px', 
                     fontSize: isMobile ? '14px' : '16px' 
                   }}>
-                    투수성 포장재 ⭐
+                    차열페인트 ⭐
                   </h4>
                   <p style={{ 
                     fontSize: isMobile ? '12px' : '14px', 
@@ -341,9 +397,9 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
                     lineHeight: '1.4',
                     marginBottom: '8px'
                   }}>
-                    다공성 구조로 빗물이 스며들어 지하수로 흐르며, 물의 증발로 자연 냉각 효과를 만드는 혁신적인 포장재입니다. 
-                    기존 아스팔트 대비 <strong style={{color: '#00ff88'}}>최대 10°C 낮은 표면온도</strong>를 유지하며, 
-                    도시 홍수 예방과 열섬현상 완화를 동시에 해결합니다.
+                    특수 반사 안료가 태양열을 반사하여 표면온도를 크게 낮추는 혁신적인 페인트입니다. 
+                    기존 아스팔트 대비 <strong style={{color: '#00ff88'}}>최대 15°C 낮은 표면온도</strong>를 유지하며, 
+                    도시 열섬현상 완화에 탁월한 효과를 보입니다.
                   </p>
                   <div style={{
                     background: 'rgba(0, 255, 136, 0.2)',
@@ -353,9 +409,9 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
                     color: '#00ff88',
                     fontWeight: 'bold'
                   }}>
-                    💧 주요 효과: 표면온도 10°C 감소 | 빗물 흡수 90% | 증발냉각 효과
+                    🌡️ 주요 효과: 표면온도 15°C 감소 | 태양열 반사 80% | 에너지 절약 25%
                   </div>
-                  {selectedTechnology === 'permeable' && (
+                  {selectedTechnology === 'heatpaint' && (
                     <div style={{
                       position: 'absolute',
                       top: '10px',
@@ -438,7 +494,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
 
             {/* 탐험 시작 버튼 */}
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
-              {selectedTechnology === 'permeable' ? (
+              {selectedTechnology === 'heatpaint' ? (
                 <button
                   onClick={() => setShowEducationPopup(false)}
                   style={{
@@ -467,7 +523,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
                     }
                   }}
                 >
-                  투수성 포장재 체험 시작
+                  차열페인트 체험 시작
                 </button>
               ) : (
                 <div style={{ textAlign: 'center' }}>
@@ -731,6 +787,14 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
                 gl.domElement.requestPointerLock()
               }
             })
+            
+            // Pointer Lock 상태 변경 감지
+            const handlePointerLockChange = () => {
+              const locked = document.pointerLockElement === gl.domElement
+              setIsLocked(locked)
+            }
+            
+            document.addEventListener('pointerlockchange', handlePointerLockChange)
           }
         }}
       >
@@ -822,6 +886,41 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             
             {/* 뜨거운 아스팔트에서 올라오는 열기 파티클 */}
             <HeatWaves />
+            
+            {/* 차열페인트가 칠해진 영역들 */}
+            {paintedAreas.map((area, index) => (
+              <group key={index}>
+                {/* 메인 페인트 영역 - 네모 모양 */}
+                <mesh 
+                  position={[area.x, 0.02, area.z]} 
+                  rotation={[-Math.PI / 2, 0, 0]}
+                >
+                  <planeGeometry args={[area.radius * 2, area.radius * 2]} />
+                  <meshStandardMaterial 
+                    color="#ffffff" 
+                    transparent 
+                    opacity={0.95}
+                    emissive="#f0f8ff"
+                    emissiveIntensity={0.3}
+                    roughness={0.1}
+                    metalness={0.1}
+                  />
+                </mesh>
+                
+                {/* 발광 효과를 위한 추가 레이어 - 네모 모양 */}
+                <mesh 
+                  position={[area.x, 0.03, area.z]} 
+                  rotation={[-Math.PI / 2, 0, 0]}
+                >
+                  <planeGeometry args={[area.radius * 2.4, area.radius * 2.4]} />
+                  <meshBasicMaterial 
+                    color="#f8f8ff" 
+                    transparent 
+                    opacity={0.2}
+                  />
+                </mesh>
+              </group>
+            ))}
           </group>
 
           {/* 플레이어 */}
@@ -840,6 +939,88 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           <Environment preset="city" />
         </Physics>
       </Canvas>
+
+      {/* 상호작용 힌트 UI */}
+      {showInteractionHint && (
+        <div style={{
+          position: 'fixed',
+          top: isMobile ? 'calc(100px + env(safe-area-inset-top))' : '120px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.9) 0%, rgba(0, 200, 100, 0.8) 100%)',
+          color: 'white',
+          padding: isMobile ? '12px 20px' : '15px 25px',
+          borderRadius: '15px',
+          fontSize: isMobile ? '14px' : '16px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          zIndex: 1002,
+          backdropFilter: 'blur(15px)',
+          border: '2px solid rgba(255, 255, 255, 0.4)',
+          boxShadow: '0 8px 32px rgba(0, 255, 136, 0.6)',
+          textShadow: '0 0 10px rgba(255, 255, 255, 0.8)',
+          animation: 'fadeIn 0.5s ease-in-out',
+          maxWidth: isMobile ? '85%' : '400px'
+        }}>
+          🎨 차열페인트를 칠했습니다! 🎨<br/>
+          <span style={{ fontSize: isMobile ? '12px' : '14px', color: '#e6ffe6' }}>
+            {isMobile ? '터치로 더 칠하기' : 'F키를 눌러 더 많은 곳에 칠하세요'}
+          </span>
+        </div>
+      )}
+
+      {/* 차열페인트 체험 안내 UI - 체험 모드일 때만 표시 */}
+      {isInteractionMode && isLocked && !showEducationPopup && (
+        <div style={{
+          position: 'fixed',
+          bottom: isMobile ? 'calc(180px + env(safe-area-inset-bottom))' : '100px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(0, 0, 0, 0.8)',
+          color: '#00ff88',
+          padding: isMobile ? '10px 15px' : '12px 20px',
+          borderRadius: '10px',
+          fontSize: isMobile ? '12px' : '14px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          zIndex: 1000,
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(0, 255, 136, 0.5)',
+          boxShadow: '0 4px 20px rgba(0, 255, 136, 0.3)',
+          maxWidth: isMobile ? '85%' : '300px'
+        }}>
+          🎨 {isMobile ? '바닥을 터치하여 차열페인트 칠하기' : 'F키를 눌러 바닥에 차열페인트를 칠하세요'}
+          <br/>
+          <small style={{ color: '#88ffaa', fontSize: '10px' }}>
+            칠해진 영역: {paintedAreas.length}개
+          </small>
+        </div>
+      )}
+
+      {/* 디버그 정보 - 개발용 (필요시 주석 해제) */}
+      {false && isInteractionMode && (
+        <div style={{
+          position: 'fixed',
+          top: '10px',
+          left: '10px',
+          background: 'rgba(0, 0, 0, 0.8)',
+          color: 'white',
+          padding: '10px',
+          borderRadius: '5px',
+          fontSize: '12px',
+          zIndex: 1001,
+          fontFamily: 'monospace'
+        }}>
+          <div>플레이어 위치: {playerPosition[0].toFixed(1)}, {playerPosition[1].toFixed(1)}, {playerPosition[2].toFixed(1)}</div>
+          <div>페인트 영역 수: {paintedAreas.length}</div>
+          <div>선택된 기술: {selectedTechnology}</div>
+          <div>체험 모드: {isInteractionMode ? 'ON' : 'OFF'}</div>
+          <div>잠금 상태: {isLocked ? 'ON' : 'OFF'}</div>
+          {paintedAreas.map((area, i) => (
+            <div key={i}>영역 {i}: ({area.x}, {area.z})</div>
+          ))}
+        </div>
+      )}
 
       {/* 모바일 가상 조이스틱 UI */}
       {isMobile && isLocked && (
@@ -875,6 +1056,64 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
               size={80}
             />
           </div>
+
+          {/* 차열페인트 버튼 - 체험 모드일 때만 표시 */}
+          {isInteractionMode && (
+            <div style={{
+              position: 'fixed',
+              bottom: 'calc(120px + env(safe-area-inset-bottom))',
+              right: '20px',
+              zIndex: 1000,
+              pointerEvents: 'auto'
+            }}>
+              <div
+                onTouchStart={(e) => {
+                  e.preventDefault()
+                  // 모바일에서 차열페인트 칠하기
+                  const newPaintArea = { 
+                    x: Math.round(playerPosition[0]), 
+                    z: Math.round(playerPosition[2]), 
+                    radius: 2 
+                  }
+                  
+                  const isDuplicate = paintedAreas.some(area => 
+                    Math.abs(area.x - newPaintArea.x) < 1.5 && Math.abs(area.z - newPaintArea.z) < 1.5
+                  )
+                  
+                  if (!isDuplicate) {
+                    setPaintedAreas(prev => [...prev, newPaintArea])
+                    setShowInteractionHint(true)
+                    setTimeout(() => setShowInteractionHint(false), 2000)
+                  }
+                }}
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, rgba(77, 166, 255, 0.9) 0%, rgba(38, 143, 255, 0.7) 100%)',
+                  border: '3px solid rgba(255, 255, 255, 0.6)',
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: '0 4px 16px rgba(77, 166, 255, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  userSelect: 'none',
+                  touchAction: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.1s ease'
+                }}
+              >
+                <span style={{
+                  fontSize: 24,
+                  fontWeight: 'bold',
+                  color: 'white',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)'
+                }}>
+                  🎨
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* 추가 모바일 안내 - 처음에만 잠깐 표시 */}
           {!isLocked && (

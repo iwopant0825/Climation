@@ -29,7 +29,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
 
   return (
     <>
-      {/* 뒤로가기 버튼 */}
+      {/* 뒤로가기 버튼 - 세련된 디자인 */}
       <button
         onClick={onBackToEarth}
         style={{
@@ -37,60 +37,103 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           top: '20px',
           left: '20px',
           zIndex: 1000,
-          padding: '12px 20px',
-          fontSize: '16px',
+          padding: '10px 18px',
+          fontSize: '14px',
           fontWeight: 'bold',
-          color: 'white',
-          background: 'rgba(255, 69, 0, 0.8)',
-          border: 'none',
-          borderRadius: '25px',
+          color: '#ffffff',
+          background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 200, 100, 0.3) 100%)',
+          border: '2px solid rgba(0, 255, 136, 0.4)',
+          borderRadius: '40px',
           cursor: 'pointer',
-          backdropFilter: 'blur(10px)',
-          transition: 'all 0.3s ease',
+          backdropFilter: 'blur(20px)',
+          boxShadow: '0 6px 24px rgba(0, 255, 136, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+          letterSpacing: '0.5px',
+          textShadow: '0 0 10px rgba(0, 255, 136, 0.5)',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)'
+          e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 255, 136, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 255, 136, 0.3) 0%, rgba(0, 200, 100, 0.4) 100%)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0) scale(1)'
+          e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 255, 136, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 200, 100, 0.3) 100%)'
         }}
       >
-        🌍 지구로 돌아가기
+        지구로 돌아가기
       </button>
 
-      {/* 정보 패널 */}
+      {/* 정보 패널 - 세련된 디자인 */}
       <div style={{
         position: 'absolute',
         top: '20px',
         right: '20px',
-        background: 'rgba(0, 0, 0, 0.8)',
+        background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(20, 20, 40, 0.6) 100%)',
         color: 'white',
-        padding: '15px',
-        borderRadius: '10px',
-        maxWidth: '300px',
+        padding: '18px',
+        borderRadius: '15px',
+        maxWidth: '280px',
         zIndex: 1000,
-        backdropFilter: 'blur(10px)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 69, 0, 0.3)',
+        boxShadow: '0 6px 24px rgba(255, 69, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
       }}>
-        <h3 style={{ margin: '0 0 10px 0', color: '#ff4500' }}>🔥 아스팔트 열섬 현상</h3>
-        <p style={{ margin: '0 0 8px 0', fontSize: '14px' }}>
+        <h3 style={{ 
+          margin: '0 0 12px 0', 
+          color: '#ff6b47',
+          fontSize: '16px',
+          fontWeight: 'bold',
+          textShadow: '0 0 15px rgba(255, 107, 71, 0.6)',
+          letterSpacing: '0.5px'
+        }}>
+          아스팔트 열섬 현상
+        </h3>
+        <p style={{ 
+          margin: '0 0 12px 0', 
+          fontSize: '13px',
+          lineHeight: '1.5',
+          color: 'rgba(255, 255, 255, 0.9)'
+        }}>
           도시의 아스팔트와 콘크리트가 태양열을 흡수하여 주변보다 온도가 높아지는 현상입니다.
         </p>
-        <div style={{ fontSize: '12px', color: '#ccc' }}>
-          💡 해결책: 녹지 확대, 쿨루프, 투수성 포장재 사용
+        <div style={{ 
+          fontSize: '12px', 
+          color: '#00ff88',
+          padding: '8px',
+          background: 'rgba(0, 255, 136, 0.1)',
+          borderRadius: '8px',
+          border: '1px solid rgba(0, 255, 136, 0.2)',
+          textShadow: '0 0 10px rgba(0, 255, 136, 0.3)'
+        }}>
+          해결책: 녹지 확대, 쿨루프, 투수성 포장재 사용
         </div>
       </div>
 
-      {/* 온도 표시 */}
+      {/* 온도 표시 - 세련된 디자인 */}
       <div style={{
         position: 'absolute',
         bottom: '20px',
         left: '20px',
-        background: 'rgba(255, 0, 0, 0.8)',
+        background: 'linear-gradient(135deg, rgba(255, 69, 0, 0.8) 0%, rgba(255, 140, 0, 0.9) 100%)',
         color: 'white',
-        padding: '10px 15px',
-        borderRadius: '20px',
+        padding: '10px 18px',
+        borderRadius: '40px',
         zIndex: 1000,
-        fontSize: '18px',
+        fontSize: '15px',
         fontWeight: 'bold',
+        backdropFilter: 'blur(20px)',
+        boxShadow: '0 6px 24px rgba(255, 69, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        textShadow: '0 0 15px rgba(0, 0, 0, 0.3)',
+        letterSpacing: '0.5px',
+        animation: 'tempPulse 2s ease-in-out infinite'
       }}>
-        🌡️ 도심 온도: 38°C (+5°C ↑)
+        도심 온도: 38°C <span style={{color: '#ffff99', textShadow: '0 0 10px rgba(255, 255, 153, 0.8)'}}>+5°C ↑</span>
       </div>
 
-      {/* 클릭 안내 UI */}
+      {/* 클릭 안내 UI - 세련된 디자인 */}
       {!isLocked && (
         <div style={{
           position: 'fixed',
@@ -98,18 +141,36 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           left: '50%',
           transform: 'translate(-50%, -50%)',
           color: 'white',
-          fontSize: '18px',
+          fontSize: '16px',
           fontWeight: 'bold',
           textAlign: 'center',
-          background: 'rgba(0, 0, 0, 0.7)',
-          padding: '20px',
-          borderRadius: '10px',
+          background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(20, 20, 40, 0.6) 100%)',
+          padding: '20px 30px',
+          borderRadius: '20px',
           zIndex: 1000,
           pointerEvents: 'none',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 6px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          textShadow: '0 0 20px rgba(255, 255, 255, 0.8)',
+          animation: 'instructionPulse 2s ease-in-out infinite'
         }}>
-          화면을 클릭하여 1인칭 모드로 진입하세요<br />
-          <div style={{ fontSize: '14px', marginTop: '10px' }}>
-            WASD: 이동 | 스페이스: 점프 | 마우스: 시점 이동
+          <div style={{
+            color: '#00ff88',
+            fontSize: '18px',
+            marginBottom: '12px',
+            textShadow: '0 0 15px rgba(0, 255, 136, 0.8)'
+          }}>
+            화면을 클릭하여 1인칭 모드로 진입하세요
+          </div>
+          <div style={{ 
+            fontSize: '14px', 
+            color: 'rgba(255, 255, 255, 0.8)',
+            lineHeight: '1.4'
+          }}>
+            <span style={{color: '#74b9ff'}}>WASD</span>: 이동 | 
+            <span style={{color: '#fd79a8'}}> 스페이스</span>: 점프 | 
+            <span style={{color: '#fdcb6e'}}> 마우스</span>: 시점 이동
           </div>
         </div>
       )}

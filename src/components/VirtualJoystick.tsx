@@ -67,19 +67,23 @@ export function VirtualJoystick({ onMove, size = 120, maxDistance = 50 }: Virtua
 
   // 터치 이벤트
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    e.preventDefault()
-    const touch = e.touches[0]
-    handleStart(touch.clientX, touch.clientY)
+    e.stopPropagation() // 이벤트 전파 중단 (preventDefault 제거)
+    if (e.touches.length === 1) {
+      const touch = e.touches[0]
+      handleStart(touch.clientX, touch.clientY)
+    }
   }, [handleStart])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    e.preventDefault()
-    const touch = e.touches[0]
-    handleMove(touch.clientX, touch.clientY)
+    e.stopPropagation() // 이벤트 전파 중단 (preventDefault 제거)
+    if (e.touches.length === 1) {
+      const touch = e.touches[0]
+      handleMove(touch.clientX, touch.clientY)
+    }
   }, [handleMove])
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    e.preventDefault()
+    e.stopPropagation() // 이벤트 전파 중단 (preventDefault 제거)
     handleEnd()
   }, [handleEnd])
 
@@ -206,12 +210,18 @@ interface JumpButtonProps {
 export function JumpButton({ onJump, size = 80 }: JumpButtonProps) {
   const [isPressed, setIsPressed] = useState(false)
 
-  const handleStart = useCallback(() => {
+  const handleStart = useCallback((e?: React.TouchEvent | React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation() // 이벤트 전파 중단 (preventDefault 제거)
+    }
     setIsPressed(true)
     onJump()
   }, [onJump])
 
-  const handleEnd = useCallback(() => {
+  const handleEnd = useCallback((e?: React.TouchEvent | React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation() // 이벤트 전파 중단 (preventDefault 제거)
+    }
     setIsPressed(false)
   }, [])
 

@@ -435,13 +435,13 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           stepSize={isMobile ? 1/30 : 1/60} // 모바일에서 물리 계산 빈도 감소
           maxSubSteps={isMobile ? 3 : 5} // 모바일에서 반복 계산 감소
         >
-                    {/* 망가진 도시 느낌의 조명 설정 */}
-          <ambientLight intensity={0.2} color="#ffddbb" />
+                    {/* 뿌옇고 탁한 스모그 조명 설정 - 열섬 현상용 */}
+          <ambientLight intensity={0.3} color="#ddd8aa" />
           
-          {/* 메인 태양 조명 - 망가진 느낌 */}
+          {/* 스모그에 가려진 약한 태양 조명 */}
           <directionalLight
-            position={[20, 15, 20]}
-            intensity={0.8}
+            position={[50, 50, 50]}
+            intensity={0.9}
             castShadow
             shadow-mapSize-width={4096}
             shadow-mapSize-height={4096}
@@ -453,45 +453,45 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             shadow-bias={-0.001}
             shadow-normalBias={0.02}
             shadow-radius={1}
-            color="#ffbb88"
+            color="#ddcc88"
           />
           
-          {/* 오염된 대기 느낌의 조명 */}
+          {/* 뿌연 대기 중의 산란광 */}
           <pointLight
-            position={[0, 5, 0]}
-            intensity={0.5}
-            color="#dd7744"
-            distance={60}
-            decay={2}
+            position={[0, 20, 0]}
+            intensity={0.4}
+            color="#ccaa77"
+            distance={100}
+            decay={1}
           />
           
-          {/* 어두운 지면 조명 */}
+          {/* 탁하고 뿌연 하늘 조명 */}
           <hemisphereLight
-            args={["#996644", "#442211", 0.3]}
+            args={["#bbaa88", "#ddcc99", 0.4]}
           />
           
-          {/* 망가진 도시 느낌의 보조 조명 */}
+          {/* 추가 확산된 조명 */}
           <directionalLight
-            position={[-15, 8, -15]}
+            position={[30, 40, 30]}
             intensity={0.3}
-            color="#cc8866"
+            color="#ccbb77"
           />
           
-          {/* 어둡고 오염된 하늘 */}
+          {/* 뿌옇고 탁한 스모그 하늘 - 열섬 현상 효과 */}
           <Sky
             distance={450000}
-            sunPosition={[0, 0.2, 1]}
-            inclination={0.8}
+            sunPosition={[1, 0.4, 0]}
+            inclination={0.4}
             azimuth={0.25}
             turbidity={25}
-            rayleigh={1.5}
-            mieCoefficient={0.01}
-            mieDirectionalG={0.85}
+            rayleigh={1.2}
+            mieCoefficient={0.03}
+            mieDirectionalG={0.95}
           />
 
           {/* 도시 모델 - 그림자 강화 */}
           <group ref={worldRef}>
-            {/* 강화된 바닥 그림자 받기 */}
+            {/* 밝은 아스팔트 바닥 */}
             <mesh 
               position={[0, 0, 0]} 
               rotation={[-Math.PI / 2, 0, 0]} 
@@ -499,7 +499,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             >
               <planeGeometry args={[200, 200]} />
               <meshLambertMaterial 
-                color="#664422" 
+                color="#888888" 
                 transparent 
                 opacity={0.9}
               />
@@ -514,9 +514,6 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             
             {/* 뜨거운 아스팔트에서 올라오는 열기 파티클 */}
             <HeatWaves />
-            
-            {/* 오염된 공기 파티클 */}
-            <PollutionParticles />
           </group>
 
           {/* 플레이어 */}
@@ -533,9 +530,6 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
 
           {/* 환경 - 뜨겁고 오염된 분위기 */}
           <Environment preset="city" />
-          
-          {/* 전체적인 열기 효과를 위한 파티클 */}
-          <HeatParticles />
         </Physics>
       </Canvas>
 
@@ -605,20 +599,20 @@ function HeatWaves() {
   const particlesRef = useRef<THREE.Points>(null)
   
   const particles = React.useMemo(() => {
-    const count = 600 // 1200 -> 600으로 감소
+    const count = 600
     const positions = new Float32Array(count * 3)
     const velocities = new Float32Array(count * 3)
     
     for (let i = 0; i < count; i++) {
       // 바닥과 건물 근처에서 집중적으로 시작
-      positions[i * 3] = (Math.random() - 0.5) * 80 // 90 -> 80으로 범위 감소
-      positions[i * 3 + 1] = Math.random() * 2
+      positions[i * 3] = (Math.random() - 0.5) * 80
+      positions[i * 3 + 1] = Math.random() * 1 // 더 낮은 시작점
       positions[i * 3 + 2] = (Math.random() - 0.5) * 80
       
-      // 불규칙한 상승 속도
-      velocities[i * 3] = (Math.random() - 0.5) * 0.6
-      velocities[i * 3 + 1] = Math.random() * 1.0 + 0.2
-      velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.6
+      // 자연스러운 불규칙한 상승 속도
+      velocities[i * 3] = (Math.random() - 0.5) * 0.3
+      velocities[i * 3 + 1] = Math.random() * 0.8 + 0.1 // 더 다양한 상승속도
+      velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.3
     }
     
     return { positions, velocities }
@@ -629,18 +623,23 @@ function HeatWaves() {
     const animate = () => {
       if (particlesRef.current) {
         const positions = particlesRef.current.geometry.attributes.position.array as Float32Array
-        const time = Date.now() * 0.0008 // 속도 조금 감소
+        const time = Date.now() * 0.001
         
         for (let i = 0; i < positions.length; i += 3) {
-          // 더 효율적인 상승
-          positions[i + 1] += 0.04
+          // 자연스러운 불규칙한 상승 - 각 파티클마다 다른 속도
+          const particleIndex = i / 3
+          const baseSpeed = 0.02 + Math.sin(time * 0.5 + particleIndex * 0.1) * 0.015
+          positions[i + 1] += baseSpeed
           
-          // 최적화된 움직임 계산
-          positions[i] += Math.sin(time + i * 0.05) * 0.015
-          positions[i + 2] += Math.cos(time + i * 0.05) * 0.015
+          // 자연스러운 좌우 흔들림 - 열기의 자연스러운 움직임
+          const wiggleX = Math.sin(time * 2 + particleIndex * 0.3) * 0.02
+          const wiggleZ = Math.cos(time * 1.5 + particleIndex * 0.2) * 0.015
+          positions[i] += wiggleX
+          positions[i + 2] += wiggleZ
           
-          // 재생성
-          if (positions[i + 1] > 20) { // 25 -> 20으로 감소
+          // 높이에 따른 점진적 투명도 감소 효과를 위한 재생성
+          const maxHeight = 15 + Math.sin(particleIndex * 0.1) * 5 // 다양한 최대 높이
+          if (positions[i + 1] > maxHeight) {
             positions[i + 1] = 0
             positions[i] = (Math.random() - 0.5) * 80
             positions[i + 2] = (Math.random() - 0.5) * 80
@@ -673,146 +672,6 @@ function HeatWaves() {
         color="#ff1100"
         transparent
         opacity={0.7}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
-  )
-}
-
-// 독성 스모그 파티클 - 최적화된 버전
-function PollutionParticles() {
-  const particlesRef = useRef<THREE.Points>(null)
-  
-  const particles = React.useMemo(() => {
-    const count = 400 // 800 -> 400으로 감소
-    const positions = new Float32Array(count * 3)
-    
-    for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 120 // 150 -> 120으로 감소
-      positions[i * 3 + 1] = Math.random() * 30 // 35 -> 30으로 감소
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 120
-    }
-    
-    return positions
-  }, [])
-
-  React.useEffect(() => {
-    let animationId: number
-    const animate = () => {
-      if (particlesRef.current) {
-        particlesRef.current.rotation.y += 0.0008 // 0.001 -> 0.0008로 감소
-        const positions = particlesRef.current.geometry.attributes.position.array as Float32Array
-        const time = Date.now() * 0.0001 // 0.0002 -> 0.0001로 감소
-        
-        for (let i = 0; i < positions.length; i += 3) {
-          // 최적화된 스모그 움직임
-          positions[i] += Math.sin(time * 2 + i * 0.008) * 0.006
-          positions[i + 1] += 0.006
-          positions[i + 2] += Math.cos(time * 2 + i * 0.008) * 0.006
-          
-          // 순환
-          if (positions[i + 1] > 30) { // 35 -> 30으로 감소
-            positions[i + 1] = 0
-            positions[i] = (Math.random() - 0.5) * 120
-            positions[i + 2] = (Math.random() - 0.5) * 120
-          }
-        }
-        
-        particlesRef.current.geometry.attributes.position.needsUpdate = true
-      }
-      animationId = requestAnimationFrame(animate)
-    }
-    animate()
-    
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId)
-      }
-    }
-  }, [])
-
-  return (
-    <points ref={particlesRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[particles, 3]}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.6} // 1.0 -> 0.6으로 더 작게
-        color="#332211"
-        transparent
-        opacity={0.4} // 0.6 -> 0.4로 더 투명하게
-        blending={THREE.NormalBlending}
-      />
-    </points>
-  )
-}
-
-// 강렬한 열기 파티클 - 최적화된 메인 효과
-function HeatParticles() {
-  const particlesRef = useRef<THREE.Points>(null)
-  
-  const particles = React.useMemo(() => {
-    const count = 1000 // 2000 -> 1000으로 감소
-    const positions = new Float32Array(count * 3)
-    
-    for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 150 // 200 -> 150으로 감소
-      positions[i * 3 + 1] = Math.random() * 35 // 40 -> 35로 감소
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 150
-    }
-    
-    return positions
-  }, [])
-
-  React.useEffect(() => {
-    let animationId: number
-    const animate = () => {
-      if (particlesRef.current) {
-        particlesRef.current.rotation.y += 0.002
-        const positions = particlesRef.current.geometry.attributes.position.array as Float32Array
-        const time = Date.now() * 0.0008 // 0.001 -> 0.0008로 감소
-        
-        for (let i = 1; i < positions.length; i += 3) {
-          // 최적화된 상승과 회전
-          positions[i] += 0.025 + Math.sin(time + i * 0.08) * 0.008
-          
-          // 재생성
-          if (positions[i] > 35) { // 40 -> 35로 감소
-            positions[i] = 0
-            positions[i - 1] = (Math.random() - 0.5) * 150
-            positions[i + 1] = (Math.random() - 0.5) * 150
-          }
-        }
-        
-        particlesRef.current.geometry.attributes.position.needsUpdate = true
-      }
-      animationId = requestAnimationFrame(animate)
-    }
-    animate()
-    
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId)
-      }
-    }
-  }, [])
-
-  return (
-    <points ref={particlesRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[particles, 3]}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.18} // 0.2 -> 0.18로 감소
-        color="#ff3300"
-        transparent
-        opacity={0.6} // 0.7 -> 0.6으로 감소
         blending={THREE.AdditiveBlending}
       />
     </points>

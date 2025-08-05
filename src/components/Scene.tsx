@@ -10,12 +10,12 @@ export function Scene() {
   const [isMobile, setIsMobile] = useState(false)
   const [isTablet, setIsTablet] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [currentWorld, setCurrentWorld] = useState<'earth' | 'asphalt'>('earth')
+  const [currentWorld, setCurrentWorld] = useState<'earth' | 'heatisland'>('earth')
 
   // 기후 위기 핸들러
-  const handleAsphaltCrisis = () => {
-    console.log('아스팔트 위기 탐험!')
-    setCurrentWorld('asphalt')
+  const handleHeatIslandCrisis = () => {
+    console.log('열섬 현상 위기 탐험!')
+    setCurrentWorld('heatisland')
   }
 
   const handleBackToEarth = () => {
@@ -61,8 +61,8 @@ export function Scene() {
     }
   }, [])
 
-  // 아스팔트 세계인 경우 별도 렌더링
-  if (currentWorld === 'asphalt') {
+  // 열섬 현상 세계인 경우 별도 렌더링
+  if (currentWorld === 'heatisland') {
     return <AsphaltWorld onBackToEarth={handleBackToEarth} />
   }
 
@@ -190,7 +190,7 @@ export function Scene() {
         
         <Stars />
         <RotatingEarth 
-          onAsphaltCrisis={handleAsphaltCrisis}
+          onHeatIslandCrisis={handleHeatIslandCrisis}
           onOtherCrisis={handleOtherCrisis}
         />
         <CameraControls />

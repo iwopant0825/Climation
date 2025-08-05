@@ -5,11 +5,11 @@ import { Earth } from './Earth';
 import { ClimatePin } from './ClimatePin';
 
 interface RotatingEarthProps {
-  onAsphaltCrisis: () => void;
+  onHeatIslandCrisis: () => void;
   onOtherCrisis: (type: string) => void;
 }
 
-const RotatingEarth: React.FC<RotatingEarthProps> = ({ onAsphaltCrisis, onOtherCrisis }) => {
+const RotatingEarth: React.FC<RotatingEarthProps> = ({ onHeatIslandCrisis, onOtherCrisis }) => {
   const groupRef = useRef<THREE.Group>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
@@ -62,11 +62,11 @@ const RotatingEarth: React.FC<RotatingEarthProps> = ({ onAsphaltCrisis, onOtherC
       {/* 기후위기 핀들 - 지구와 함께 회전 */}
       <ClimatePin
         position={[1.5, 0.8, 1.2]}
-        title="아스팔트 열섬 현상"
-        description="도시 아스팔트로 인한 온도 상승"
-        detailedInfo="도시의 아스팔트와 콘크리트는 태양열을 흡수하여 주변보다 2-5°C 높은 온도를 만듭니다. 이는 에너지 소비 증가, 대기질 악화, 열사병 위험 증가 등을 야기합니다."
+        title="도시 열섬 현상"
+        description="도시 지역의 온도 상승"
+        detailedInfo="도시의 아스팔트, 콘크리트, 건물들이 태양열을 흡수하여 주변 농촌보다 2-8°C 높은 온도를 만듭니다. 이는 에너지 소비 증가, 대기질 악화, 열사병 위험 증가, 도시 생활의 질 저하를 야기합니다."
         color="#ff4444"
-        onClick={onAsphaltCrisis}
+        onClick={onHeatIslandCrisis}
       />
       
       <ClimatePin

@@ -153,42 +153,58 @@ export function Scene() {
 
       {/* 3D 캔버스 */}
       <Canvas
-        camera={{ position: [0, 0, 5], fov: 75 }}
+        camera={{ 
+          position: [0, 0, 5], 
+          fov: isMobile ? 85 : 75 // 모바일에서 더 넓은 시야각
+        }}
         style={{ background: 'transparent' }}
+        dpr={isMobile ? [1, 1.5] : [1, 2]} // 모바일에서 성능 최적화
+        performance={{ min: 0.5 }} // 성능 임계값 설정
+        gl={{ 
+          antialias: !isMobile, // 모바일에서 안티앨리어싱 비활성화
+          powerPreference: isMobile ? "low-power" : "high-performance",
+          alpha: false // 투명도 비활성화로 성능 향상
+        }}
       >
-        {/* 전체 기본 조명 - 밝기 증가 */}
-        <ambientLight intensity={0.6} />
+        {/* 전체 기본 조명 - 모바일에서 조명 최적화 */}
+        <ambientLight intensity={isMobile ? 0.8 : 0.6} />
         
         {/* 메인 태양광 (지구 정면) */}
         <directionalLight 
           position={[10, 10, 5]} 
-          intensity={1.2} 
+          intensity={isMobile ? 1.0 : 1.2} 
           color="#ffffff"
-          castShadow
+          castShadow={!isMobile} // 모바일에서 그림자 비활성화
         />
         
-        {/* 보조 조명 (지구 측면) */}
-        <pointLight 
-          position={[-8, 5, 8]} 
-          intensity={0.8} 
-          color="#ffeaa7"
-        />
+        {/* 보조 조명 (지구 측면) - 모바일에서 간소화 */}
+        {!isMobile && (
+          <pointLight 
+            position={[-8, 5, 8]} 
+            intensity={0.8} 
+            color="#ffeaa7"
+          />
+        )}
         
-        {/* 뒷조명 (지구 뒤쪽 가장자리) */}
-        <pointLight 
-          position={[0, -5, -10]} 
-          intensity={0.5} 
-          color="#74b9ff"
-        />
+        {/* 뒷조명 (지구 뒤쪽 가장자리) - 모바일에서 간소화 */}
+        {!isMobile && (
+          <pointLight 
+            position={[0, -5, -10]} 
+            intensity={0.5} 
+            color="#74b9ff"
+          />
+        )}
         
-        {/* 상단 조명 (북극 쪽) */}
-        <pointLight 
-          position={[0, 15, 0]} 
-          intensity={0.4} 
-          color="#fdcb6e"
-        />
+        {/* 상단 조명 (북극 쪽) - 모바일에서 간소화 */}
+        {!isMobile && (
+          <pointLight 
+            position={[0, 15, 0]} 
+            intensity={0.4} 
+            color="#fdcb6e"
+          />
+        )}
         
-        <Stars />
+        <Stars /> {/* 별 개수는 Stars 컴포넌트 내부에서 조정 */}
         <RotatingEarth 
           onHeatIslandCrisis={handleHeatIslandCrisis}
           onOtherCrisis={handleOtherCrisis}

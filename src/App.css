@@ -4,6 +4,14 @@
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  /* 모바일 최적화 */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
 }
 
 .App-logo {
@@ -105,5 +113,93 @@
   to {
     opacity: 0;
     transform: translateY(-20px);
+  }
+}
+
+/* 모바일 및 태블릿 최적화 스타일 */
+@media (max-width: 768px) {
+  /* 모바일 스타일 */
+  .mobile-ui {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+  }
+
+  .mobile-button {
+    padding: 12px 16px !important;
+    font-size: 12px !important;
+    border-radius: 25px !important;
+    min-width: 60px;
+    text-align: center;
+    min-height: 44px;
+  }
+
+  .info-panel-mobile {
+    top: 10px !important;
+    right: 10px !important;
+    left: 10px !important;
+    max-width: none !important;
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+
+  .back-button-mobile {
+    top: 10px !important;
+    left: 10px !important;
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+    min-height: 44px;
+  }
+
+  .boundary-warning-mobile {
+    bottom: 80px !important;
+    left: 10px !important;
+    right: 10px !important;
+    text-align: center;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* 태블릿 스타일 */
+  .tablet-ui {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .tablet-button {
+    padding: 14px 20px !important;
+    font-size: 14px !important;
+    border-radius: 30px !important;
+    min-height: 44px;
+  }
+
+  .info-panel-tablet {
+    padding: 16px !important;
+    max-width: 320px !important;
+  }
+}
+
+/* 터치 디바이스 최적화 */
+@media (pointer: coarse) {
+  .touch-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* 가로 모드 최적화 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .landscape-mobile {
+    padding: 8px !important;
+    font-size: 12px !important;
   }
 }

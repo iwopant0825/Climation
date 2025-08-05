@@ -4,6 +4,7 @@ import { Physics } from '@react-three/cannon'
 import { Environment, Sky } from '@react-three/drei'
 import { Player } from './Player'
 import { CityWithPhysics } from './CityWithPhysics'
+import { VirtualJoystick, JumpButton } from './VirtualJoystick'
 import * as THREE from 'three'
 
 interface AsphaltWorldProps {
@@ -14,6 +15,33 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
   const worldRef = useRef<THREE.Group>(null)
   const [isLocked, setIsLocked] = React.useState(false)
   const [showBoundaryWarning, setShowBoundaryWarning] = React.useState(false)
+  const [isMobile, setIsMobile] = React.useState(false)
+  const [isTablet, setIsTablet] = React.useState(false)
+  
+  // 가상 조이스틱 상태
+  const [joystickInput, setJoystickInput] = React.useState({ x: 0, y: 0 })
+  const [isJumping, setIsJumping] = React.useState(false)
+
+  // 기기 타입 감지
+  React.useEffect(() => {
+    const checkDeviceType = () => {
+      const width = window.innerWidth
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      const isTouchDevice = 'ontouchstart' in window
+      
+      setIsMobile((isMobileDevice || isTouchDevice) && width <= 768)
+      setIsTablet((isMobileDevice || isTouchDevice) && width > 768 && width <= 1024)
+    }
+
+    checkDeviceType()
+    window.addEventListener('resize', checkDeviceType)
+    window.addEventListener('orientationchange', checkDeviceType)
+
+    return () => {
+      window.removeEventListener('resize', checkDeviceType)
+      window.removeEventListener('orientationchange', checkDeviceType)
+    }
+  }, [])
 
   // 플레이어 위치 변경 핸들러
   const handlePlayerPositionChange = React.useCallback((position: [number, number, number]) => {
@@ -43,16 +71,17 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
     <>
       {/* 오버레이 제거로 더 밝게 */}
 
-      {/* 뒤로가기 버튼 - 세련된 디자인 */}
+      {/* 뒤로가기 버튼 - 반응형 디자인 */}
       <button
         onClick={onBackToEarth}
+        className={isMobile ? 'back-button-mobile' : isTablet ? 'tablet-button' : ''}
         style={{
           position: 'absolute',
-          top: '20px',
-          left: '20px',
+          top: isMobile ? '10px' : '20px',
+          left: isMobile ? '10px' : '20px',
           zIndex: 1000,
-          padding: '10px 18px',
-          fontSize: '14px',
+          padding: isMobile ? '8px 12px' : '10px 18px',
+          fontSize: isMobile ? '12px' : '14px',
           fontWeight: 'bold',
           color: '#ffffff',
           background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 200, 100, 0.3) 100%)',
@@ -64,31 +93,39 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
           letterSpacing: '0.5px',
           textShadow: '0 0 10px rgba(0, 255, 136, 0.5)',
+          minHeight: isMobile ? '44px' : 'auto', // 터치 친화적 크기
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)'
-          e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 255, 136, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 255, 136, 0.3) 0%, rgba(0, 200, 100, 0.4) 100%)'
+          if (!isMobile) {
+            e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)'
+            e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 255, 136, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 255, 136, 0.3) 0%, rgba(0, 200, 100, 0.4) 100%)'
+          }
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0) scale(1)'
-          e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 255, 136, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 200, 100, 0.3) 100%)'
+          if (!isMobile) {
+            e.currentTarget.style.transform = 'translateY(0) scale(1)'
+            e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 255, 136, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 200, 100, 0.3) 100%)'
+          }
         }}
       >
-        지구로 돌아가기
+        {isMobile ? '뒤로' : '지구로 돌아가기'}
       </button>
 
-      {/* 정보 패널 - 세련된 디자인 */}
-      <div style={{
+      {/* 정보 패널 - 반응형 디자인 */}
+      <div 
+        className={isMobile ? 'info-panel-mobile' : isTablet ? 'info-panel-tablet' : ''}
+        style={{
         position: 'absolute',
-        top: '20px',
-        right: '20px',
+        top: isMobile ? '10px' : '20px',
+        right: isMobile ? '10px' : '20px',
+        left: isMobile ? '10px' : 'auto',
         background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(20, 20, 40, 0.6) 100%)',
         color: 'white',
-        padding: '18px',
+        padding: isMobile ? '12px' : '18px',
         borderRadius: '15px',
-        maxWidth: '280px',
+        maxWidth: isMobile ? 'none' : isTablet ? '320px' : '280px',
         zIndex: 1000,
         backdropFilter: 'blur(20px)',
         border: '1px solid rgba(255, 69, 0, 0.3)',
@@ -97,7 +134,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
         <h3 style={{ 
           margin: '0 0 12px 0', 
           color: '#ff6b47',
-          fontSize: '16px',
+          fontSize: isMobile ? '14px' : '16px',
           fontWeight: 'bold',
           textShadow: '0 0 15px rgba(255, 107, 71, 0.6)',
           letterSpacing: '0.5px'
@@ -106,14 +143,17 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
         </h3>
         <p style={{ 
           margin: '0 0 12px 0', 
-          fontSize: '13px',
+          fontSize: isMobile ? '12px' : '13px',
           lineHeight: '1.5',
           color: 'rgba(255, 255, 255, 0.9)'
         }}>
-          도시 지역이 주변 농촌보다 높은 온도를 보이는 현상으로, 아스팔트, 콘크리트, 건물 등이 태양열을 흡수하여 발생합니다.
+          {isMobile 
+            ? '도시가 주변보다 뜨거워지는 현상입니다.'
+            : '도시 지역이 주변 농촌보다 높은 온도를 보이는 현상으로, 아스팔트, 콘크리트, 건물 등이 태양열을 흡수하여 발생합니다.'
+          }
         </p>
         <div style={{ 
-          fontSize: '12px', 
+          fontSize: isMobile ? '11px' : '12px', 
           color: '#00ff88',
           padding: '8px',
           background: 'rgba(0, 255, 136, 0.1)',
@@ -121,45 +161,54 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           border: '1px solid rgba(0, 255, 136, 0.2)',
           textShadow: '0 0 10px rgba(0, 255, 136, 0.3)'
         }}>
-          해결책: 녹지 확대, 쿨루프, 투수성 포장재, 건물 외벽 녹화
+          {isMobile 
+            ? '해결책: 녹지, 쿨루프, 투수성 포장재'
+            : '해결책: 녹지 확대, 쿨루프, 투수성 포장재, 건물 외벽 녹화'
+          }
         </div>
       </div>
 
-      {/* 온도 표시 - 세련된 디자인 */}
+      {/* 온도 표시 - 반응형 디자인 */}
       <div style={{
         position: 'absolute',
-        bottom: '20px',
-        left: '20px',
+        bottom: isMobile ? '80px' : '20px', // 모바일에서 가상 조이스틱 공간 확보
+        left: isMobile ? '50%' : '20px',
+        transform: isMobile ? 'translateX(-50%)' : 'none',
         background: 'linear-gradient(135deg, rgba(255, 69, 0, 0.8) 0%, rgba(255, 140, 0, 0.9) 100%)',
         color: 'white',
-        padding: '10px 18px',
+        padding: isMobile ? '8px 14px' : '10px 18px',
         borderRadius: '40px',
         zIndex: 1000,
-        fontSize: '15px',
+        fontSize: isMobile ? '13px' : '15px',
         fontWeight: 'bold',
         backdropFilter: 'blur(20px)',
         boxShadow: '0 6px 24px rgba(255, 69, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
         border: '1px solid rgba(255, 255, 255, 0.2)',
         textShadow: '0 0 15px rgba(0, 0, 0, 0.3)',
         letterSpacing: '0.5px',
-        animation: 'tempPulse 2s ease-in-out infinite'
+        animation: 'tempPulse 2s ease-in-out infinite',
+        textAlign: 'center' as const,
       }}>
-        도심 온도: 38°C <span style={{color: '#ffff99', textShadow: '0 0 10px rgba(255, 255, 153, 0.8)'}}>+5°C ↑</span>
+        {isMobile ? '🌡️ 38°C +5°C ↑' : '도심 온도: 38°C '}<span style={{color: '#ffff99', textShadow: '0 0 10px rgba(255, 255, 153, 0.8)'}}>{!isMobile && '+5°C ↑'}</span>
       </div>
 
-      {/* 경계 경고 UI */}
+      {/* 경계 경고 UI - 반응형 */}
       {showBoundaryWarning && (
-        <div style={{
+        <div 
+          className={isMobile ? 'boundary-warning-mobile' : ''}
+          style={{
           position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
+          top: isMobile ? 'auto' : '50%',
+          bottom: isMobile ? '120px' : 'auto',
+          left: isMobile ? '10px' : '50%',
+          right: isMobile ? '10px' : 'auto',
+          transform: isMobile ? 'none' : 'translate(-50%, -50%)',
           color: '#ff4444',
-          fontSize: '20px',
+          fontSize: isMobile ? '16px' : '20px',
           fontWeight: 'bold',
           textAlign: 'center',
           background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.8) 0%, rgba(255, 100, 0, 0.7) 100%)',
-          padding: '20px 30px',
+          padding: isMobile ? '15px 20px' : '20px 30px',
           borderRadius: '15px',
           zIndex: 1001,
           backdropFilter: 'blur(20px)',
@@ -168,24 +217,26 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           textShadow: '0 0 10px rgba(255, 255, 255, 0.8)',
           animation: 'pulse 1s ease-in-out infinite'
         }}>
-          ⚠️ 맵 경계에 도달했습니다! ⚠️<br/>
-          <span style={{ fontSize: '16px', color: '#ffcccc' }}>곧 시작점으로 돌아갑니다.</span>
+          ⚠️ {isMobile ? '맵 경계 도달!' : '맵 경계에 도달했습니다!'} ⚠️<br/>
+          <span style={{ fontSize: isMobile ? '14px' : '16px', color: '#ffcccc' }}>
+            {isMobile ? '곧 시작점으로 이동' : '곧 시작점으로 돌아갑니다.'}
+          </span>
         </div>
       )}
 
-      {/* 클릭 안내 UI - 세련된 디자인 */}
+      {/* 클릭/터치 안내 UI - 반응형 디자인 */}
       {!isLocked && (
         <div style={{
           position: 'fixed',
-          top: '50%',
+          top: isMobile ? '40%' : '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
           color: 'white',
-          fontSize: '16px',
+          fontSize: isMobile ? '14px' : '16px',
           fontWeight: 'bold',
           textAlign: 'center',
           background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(20, 20, 40, 0.6) 100%)',
-          padding: '20px 30px',
+          padding: isMobile ? '16px 24px' : '20px 30px',
           borderRadius: '20px',
           zIndex: 1000,
           pointerEvents: 'none',
@@ -193,44 +244,59 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           border: '1px solid rgba(255, 255, 255, 0.2)',
           boxShadow: '0 6px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
           textShadow: '0 0 20px rgba(255, 255, 255, 0.8)',
-          animation: 'instructionPulse 2s ease-in-out infinite'
+          animation: 'instructionPulse 2s ease-in-out infinite',
+          maxWidth: isMobile ? '90%' : 'auto'
         }}>
           <div style={{
             color: '#00ff88',
-            fontSize: '18px',
+            fontSize: isMobile ? '16px' : '18px',
             marginBottom: '12px',
             textShadow: '0 0 15px rgba(0, 255, 136, 0.8)'
           }}>
-            화면을 클릭하여 1인칭 모드로 진입하세요
+            {isMobile ? '화면을 터치하여 1인칭 모드 진입' : '화면을 클릭하여 1인칭 모드로 진입하세요'}
           </div>
           <div style={{ 
-            fontSize: '14px', 
+            fontSize: isMobile ? '12px' : '14px', 
             color: 'rgba(255, 255, 255, 0.8)',
             lineHeight: '1.4'
           }}>
-            <span style={{color: '#74b9ff'}}>WASD</span>: 이동 | 
-            <span style={{color: '#fd79a8'}}> 스페이스</span>: 점프 | 
-            <span style={{color: '#fdcb6e'}}> 마우스</span>: 시점 이동
+            {isMobile ? (
+              <>
+                <span style={{color: '#74b9ff'}}>가상패드</span>: 이동 | 
+                <span style={{color: '#fd79a8'}}> 점프버튼</span>: 점프 | 
+                <span style={{color: '#fdcb6e'}}> 드래그</span>: 시점
+              </>
+            ) : (
+              <>
+                <span style={{color: '#74b9ff'}}>WASD</span>: 이동 | 
+                <span style={{color: '#fd79a8'}}> 스페이스</span>: 점프 | 
+                <span style={{color: '#fdcb6e'}}> 마우스</span>: 시점 이동
+              </>
+            )}
           </div>
         </div>
       )}
 
-      {/* 3D Canvas - 고품질 그림자 설정 */}
+      {/* 3D Canvas - 반응형 최적화 */}
       <Canvas
         style={{ width: '100vw', height: '100vh' }}
-        shadows={{
+        shadows={!isMobile ? {
           type: THREE.PCFSoftShadowMap,
-        }}
+        } : false} // 모바일에서 그림자 비활성화
         gl={{
           outputColorSpace: THREE.LinearSRGBColorSpace,
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 0.6
+          toneMappingExposure: 0.6,
+          antialias: !isMobile, // 모바일에서 안티앨리어싱 비활성화
+          powerPreference: isMobile ? "low-power" : "high-performance"
         }}
+        dpr={isMobile ? [1, 1.5] : [1, 2]} // 모바일에서 해상도 조정
+        performance={{ min: 0.5 }}
         camera={{
           position: [0, 5, 10],
-          fov: 75,
+          fov: isMobile ? 85 : 75, // 모바일에서 더 넓은 시야
           near: 0.1,
-          far: 1000,
+          far: isMobile ? 500 : 1000, // 모바일에서 렌더 거리 단축
         }}
       >
         <Physics
@@ -328,6 +394,9 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           <Player 
             position={[0, 3, 0]} 
             onPositionChange={handlePlayerPositionChange}
+            isMobile={isMobile}
+            virtualJoystickInput={joystickInput}
+            jumpPressed={isJumping}
           />
 
           {/* 환경 - 뜨겁고 오염된 분위기 */}
@@ -337,6 +406,64 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           <HeatParticles />
         </Physics>
       </Canvas>
+
+      {/* 모바일 가상 조이스틱 UI */}
+      {isMobile && isLocked && (
+        <>
+          {/* 가상 조이스틱 */}
+          <div style={{
+            position: 'fixed',
+            bottom: '20px',
+            left: '20px',
+            zIndex: 1000,
+            pointerEvents: 'auto'
+          }}>
+            <VirtualJoystick
+              onMove={(x, y) => setJoystickInput({ x, y })}
+              size={120}
+              maxDistance={50}
+            />
+          </div>
+
+          {/* 점프 버튼 */}
+          <div style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            zIndex: 1000,
+            pointerEvents: 'auto'
+          }}>
+            <JumpButton
+              onJump={() => {
+                setIsJumping(true)
+                setTimeout(() => setIsJumping(false), 200) // 200ms 후 해제
+              }}
+              size={80}
+            />
+          </div>
+
+          {/* 추가 모바일 안내 - 처음에만 잠깐 표시 */}
+          {!isLocked && (
+            <div style={{
+              position: 'fixed',
+              bottom: '120px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: 'white',
+              fontSize: '12px',
+              textAlign: 'center',
+              background: 'rgba(0, 0, 0, 0.8)',
+              padding: '8px 12px',
+              borderRadius: '20px',
+              zIndex: 999,
+              maxWidth: '80%',
+              border: '1px solid rgba(255, 255, 255, 0.3)'
+            }}>
+              📱 좌측: 이동 | 우측: 점프
+            </div>
+          )}
+        </>
+      )}
     </>
   )
 }

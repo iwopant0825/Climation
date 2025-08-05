@@ -7,9 +7,18 @@ import * as THREE from 'three'
 interface PlayerProps {
   position?: [number, number, number]
   onPositionChange?: (position: [number, number, number]) => void
+  isMobile?: boolean
+  virtualJoystickInput?: { x: number, y: number }
+  jumpPressed?: boolean
 }
 
-export function Player({ position = [0, 2, 0], onPositionChange }: PlayerProps) {
+export function Player({ 
+  position = [0, 2, 0], 
+  onPositionChange, 
+  isMobile = false,
+  virtualJoystickInput = { x: 0, y: 0 },
+  jumpPressed = false 
+}: PlayerProps) {
   const { camera, gl } = useThree()
   const [ref, api] = useCylinder(() => ({
     mass: 1,
@@ -165,10 +174,10 @@ export function Player({ position = [0, 2, 0], onPositionChange }: PlayerProps) 
     cameraDirection.current.set(0, 0, -1).applyEuler(euler)
     
     // 카메라 위치 설정 (1인칭)
-    camera.position.set(x, y + 0.4, z) // 눈 높이 (1.2 -> 0.8로 더 낮춤)
+    camera.position.set(x, y + 0.4, z) // 눈 높이
     camera.setRotationFromEuler(euler)
     
-    // 이동 방향 계산
+    // 이동 방향 계산 (키보드 + 가상 조이스틱)
     const moveDirection = new Vector3()
     const forward = new Vector3(0, 0, -1).applyQuaternion(camera.quaternion)
     const right = new Vector3(1, 0, 0).applyQuaternion(camera.quaternion)
@@ -178,13 +187,21 @@ export function Player({ position = [0, 2, 0], onPositionChange }: PlayerProps) 
     forward.normalize()
     right.normalize()
     
+    // 키보드 입력 처리
     if (keys.current.forward) moveDirection.add(forward)
     if (keys.current.backward) moveDirection.sub(forward)
     if (keys.current.right) moveDirection.add(right)
     if (keys.current.left) moveDirection.sub(right)
     
+    // 가상 조이스틱 입력 처리 (모바일)
+    if (isMobile && (Math.abs(virtualJoystickInput.x) > 0.1 || Math.abs(virtualJoystickInput.y) > 0.1)) {
+      const joystickForward = forward.clone().multiplyScalar(virtualJoystickInput.y)
+      const joystickRight = right.clone().multiplyScalar(virtualJoystickInput.x)
+      moveDirection.add(joystickForward).add(joystickRight)
+    }
+    
     // 이동 속도 적용
-    const moveSpeed = isOnGround ? 55 : 3 // 지면에서는 더 빠른 속도, 공중에서는 낮은 조작력
+    const moveSpeed = isOnGround ? (isMobile ? 45 : 55) : 3 // 모바일에서 약간 느리게
     moveDirection.multiplyScalar(moveSpeed)
     
     // 수평 이동 적용 - 공중에서는 현재 속도에 추가하는 방식
@@ -215,8 +232,8 @@ export function Player({ position = [0, 2, 0], onPositionChange }: PlayerProps) 
       }
     }
     
-    // 점프 (지면에 있을 때만)
-    if (keys.current.jump && isOnGround) {
+    // 점프 (지면에 있을 때만) - 키보드 또는 모바일 버튼
+    if ((keys.current.jump || (isMobile && jumpPressed)) && isOnGround) {
       api.velocity.set(vx, 8, vz)
     }
   })

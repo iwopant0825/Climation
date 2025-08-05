@@ -61,24 +61,25 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
       setIsLocked(document.pointerLockElement !== null)
     }
     
-    // 모바일에서는 화면 터치 시 즉시 락 모드로 전환
-    const handleMobileTouch = () => {
-      if (isMobile && !isLocked) {
-        setIsLocked(true)
-      }
-    }
-    
     document.addEventListener('pointerlockchange', handlePointerLockChange)
     
-    if (isMobile) {
-      document.addEventListener('touchstart', handleMobileTouch, { once: true })
+    // 모바일에서는 첫 터치 시 즉시 락 모드로 전환
+    if (isMobile && !isLocked) {
+      const enableMobileMode = () => {
+        setIsLocked(true)
+      }
+      
+      // 약간의 지연을 두고 모바일 모드 활성화
+      const timer = setTimeout(enableMobileMode, 100)
+      
+      return () => {
+        clearTimeout(timer)
+        document.removeEventListener('pointerlockchange', handlePointerLockChange)
+      }
     }
     
     return () => {
       document.removeEventListener('pointerlockchange', handlePointerLockChange)
-      if (isMobile) {
-        document.removeEventListener('touchstart', handleMobileTouch)
-      }
     }
   }, [isMobile, isLocked])
 
@@ -277,7 +278,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
               marginBottom: '12px',
               textShadow: '0 0 15px rgba(0, 255, 136, 0.8)'
             }}>
-              {isMobile ? '🎮 화면 아무곳이나 터치하세요!' : '화면을 클릭하여 1인칭 모드로 진입하세요'}
+              {isMobile ? '🎮 1인칭 모드 활성화됨!' : '화면을 클릭하여 1인칭 모드로 진입하세요'}
             </div>
             <div style={{ 
               fontSize: isMobile ? '12px' : '14px', 
@@ -286,7 +287,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             }}>
               {isMobile ? (
                 <>
-                  <span style={{color: '#74b9ff'}}>👆 드래그</span>: 시점 조작<br/>
+                  <span style={{color: '#74b9ff'}}>👆 화면 드래그</span>: 시점 조작<br/>
                   <span style={{color: '#fd79a8'}}>🕹️ 가상패드</span>: 이동 | 
                   <span style={{color: '#fdcb6e'}}> 🔘 버튼</span>: 점프
                 </>
@@ -299,35 +300,6 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
               )}
             </div>
           </div>
-
-          {/* 모바일용 전체 화면 터치 영역 */}
-          {isMobile && (
-            <div
-              style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                zIndex: 999,
-                cursor: 'pointer',
-                backgroundColor: 'transparent'
-              }}
-              onTouchStart={(e) => {
-                e.preventDefault()
-                const canvas = document.querySelector('canvas')
-                if (canvas) {
-                  canvas.requestPointerLock()
-                }
-              }}
-              onClick={() => {
-                const canvas = document.querySelector('canvas')
-                if (canvas) {
-                  canvas.requestPointerLock()
-                }
-              }}
-            />
-          )}
         </>
       )}
 
@@ -353,22 +325,14 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           far: isMobile ? 500 : 1000, // 모바일에서 렌더 거리 단축
         }}
         onCreated={({ gl }) => {
-          // 모바일에서 터치 이벤트 처리
-          if (isMobile) {
-            gl.domElement.addEventListener('touchstart', (e) => {
-              e.preventDefault()
+          // 데스크톱에서만 클릭 이벤트 처리  
+          if (!isMobile) {
+            gl.domElement.addEventListener('click', () => {
               if (!isLocked) {
                 gl.domElement.requestPointerLock()
               }
             })
           }
-          
-          // 데스크톱에서 클릭 이벤트 처리  
-          gl.domElement.addEventListener('click', () => {
-            if (!isLocked) {
-              gl.domElement.requestPointerLock()
-            }
-          })
         }}
       >
         <Physics

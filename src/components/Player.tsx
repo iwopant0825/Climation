@@ -151,6 +151,15 @@ export function Player({ position = [0, 2, 0], onPositionChange }: PlayerProps) 
     const [x, y, z] = pos.current
     const [vx, vy, vz] = velocity.current
     
+    // 맵 경계 체크 (맵 크기를 40x40으로 가정)
+    const mapBoundary = 40
+    if (Math.abs(x) > mapBoundary || Math.abs(z) > mapBoundary) {
+      // 시작점으로 텔레포트
+      api.position.set(0, 5, 0)
+      api.velocity.set(0, 0, 0)
+      return
+    }
+    
     // 카메라 방향 업데이트
     const euler = new Euler(cameraRotation.current.x, cameraRotation.current.y, 0, 'YXZ')
     cameraDirection.current.set(0, 0, -1).applyEuler(euler)

@@ -68,11 +68,15 @@ export function Scene() {
 
   return (
     <div style={{ 
-      position: 'relative', 
+      position: 'fixed',
+      top: 0,
+      left: 0,
       width: '100vw', 
       height: '100vh',
-      minHeight: '100dvh', 
-      overflow: 'hidden' 
+      minHeight: '100dvh',
+      maxHeight: isMobile ? '100dvh' : '100vh',
+      overflow: 'hidden',
+      background: 'transparent'
     }}>
       {/* 로딩 화면 */}
       {isLoading && (
@@ -222,7 +226,7 @@ export function Scene() {
       {!isLoading && (
         <div style={{
           position: 'absolute',
-          bottom: isMobile ? 'calc(15px + env(safe-area-inset-bottom))' : isTablet ? '20px' : '25px',
+          bottom: isMobile ? 'calc(30px + env(safe-area-inset-bottom))' : isTablet ? '20px' : '25px',
           left: isMobile ? '15px' : isTablet ? '20px' : '25px',
           color: 'white',
           fontFamily: 'Arial, sans-serif',
@@ -264,7 +268,7 @@ export function Scene() {
       {!isLoading && (
         <div style={{
           position: 'absolute',
-          bottom: isMobile ? 'calc(15px + env(safe-area-inset-bottom))' : '25px',
+          bottom: isMobile ? 'calc(30px + env(safe-area-inset-bottom))' : '25px',
           right: isMobile ? '15px' : '25px',
           color: 'rgba(255, 255, 255, 0.8)',
           fontFamily: 'Arial, sans-serif',

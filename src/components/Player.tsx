@@ -37,8 +37,7 @@ export function Player({
   const cameraDirection = useRef<THREE.Vector3>(new THREE.Vector3())
   const [isOnGround, setIsOnGround] = useState(false)
   
-  // 마우스 감도 및 카메라 각도
-  const mouseSensitivity = 0.002
+  // 카메라 각도 (MobileCameraControls와 동기화용)
   const cameraRotation = useRef({ x: 0, y: 0 })
   const isLocked = useRef(false)
   
@@ -51,7 +50,7 @@ export function Player({
     jump: false,
   })
 
-  // 포인터 락 설정
+  // 포인터 락 상태만 감지 (카메라 조작은 MobileCameraControls에서 처리)
   useEffect(() => {
     const canvas = gl.domElement
     
@@ -59,30 +58,10 @@ export function Player({
       isLocked.current = document.pointerLockElement === canvas
     }
     
-    const handleClick = () => {
-      if (!isLocked.current) {
-        canvas.requestPointerLock()
-      }
-    }
-    
-    const handleMouseMove = (event: MouseEvent) => {
-      if (!isLocked.current) return
-      
-      cameraRotation.current.y -= event.movementX * mouseSensitivity
-      cameraRotation.current.x -= event.movementY * mouseSensitivity
-      
-      // 상하 각도 제한
-      cameraRotation.current.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraRotation.current.x))
-    }
-    
     document.addEventListener('pointerlockchange', handlePointerLockChange)
-    canvas.addEventListener('click', handleClick)
-    document.addEventListener('mousemove', handleMouseMove)
     
     return () => {
       document.removeEventListener('pointerlockchange', handlePointerLockChange)
-      canvas.removeEventListener('click', handleClick)
-      document.removeEventListener('mousemove', handleMouseMove)
     }
   }, [gl])
 

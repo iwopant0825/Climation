@@ -5,6 +5,7 @@ import { Environment, Sky } from '@react-three/drei'
 import { Player } from './Player'
 import { CityWithPhysics } from './CityWithPhysics'
 import { VirtualJoystick, JumpButton } from './VirtualJoystick'
+import { MobileCameraControls } from './MobileCameraControls'
 import * as THREE from 'three'
 
 interface AsphaltWorldProps {
@@ -68,9 +69,17 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
   }, [])
 
   return (
-    <>
-      {/* 오버레이 제거로 더 밝게 */}
-
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      minHeight: '100dvh',
+      maxHeight: isMobile ? '100dvh' : '100vh',
+      overflow: 'hidden',
+      background: 'transparent'
+    }}>
       {/* 뒤로가기 버튼 - 반응형 디자인 */}
       <button
         onClick={onBackToEarth}
@@ -226,55 +235,86 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
 
       {/* 클릭/터치 안내 UI - 반응형 디자인 */}
       {!isLocked && (
-        <div style={{
-          position: 'fixed',
-          top: isMobile ? '40%' : '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          color: 'white',
-          fontSize: isMobile ? '14px' : '16px',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(20, 20, 40, 0.6) 100%)',
-          padding: isMobile ? '16px 24px' : '20px 30px',
-          borderRadius: '20px',
-          zIndex: 1000,
-          pointerEvents: 'none',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          boxShadow: '0 6px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-          textShadow: '0 0 20px rgba(255, 255, 255, 0.8)',
-          animation: 'instructionPulse 2s ease-in-out infinite',
-          maxWidth: isMobile ? '90%' : 'auto'
-        }}>
+        <>
           <div style={{
-            color: '#00ff88',
-            fontSize: isMobile ? '16px' : '18px',
-            marginBottom: '12px',
-            textShadow: '0 0 15px rgba(0, 255, 136, 0.8)'
+            position: 'fixed',
+            top: isMobile ? '40%' : '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            color: 'white',
+            fontSize: isMobile ? '14px' : '16px',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(20, 20, 40, 0.6) 100%)',
+            padding: isMobile ? '16px 24px' : '20px 30px',
+            borderRadius: '20px',
+            zIndex: 1000,
+            pointerEvents: 'none',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 6px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+            textShadow: '0 0 20px rgba(255, 255, 255, 0.8)',
+            animation: 'instructionPulse 2s ease-in-out infinite',
+            maxWidth: isMobile ? '90%' : 'auto'
           }}>
-            {isMobile ? '화면을 터치하여 1인칭 모드 진입' : '화면을 클릭하여 1인칭 모드로 진입하세요'}
+            <div style={{
+              color: '#00ff88',
+              fontSize: isMobile ? '16px' : '18px',
+              marginBottom: '12px',
+              textShadow: '0 0 15px rgba(0, 255, 136, 0.8)'
+            }}>
+              {isMobile ? '화면을 터치하여 1인칭 모드 진입' : '화면을 클릭하여 1인칭 모드로 진입하세요'}
+            </div>
+            <div style={{ 
+              fontSize: isMobile ? '12px' : '14px', 
+              color: 'rgba(255, 255, 255, 0.8)',
+              lineHeight: '1.4'
+            }}>
+              {isMobile ? (
+                <>
+                  <span style={{color: '#74b9ff'}}>가상패드</span>: 이동 | 
+                  <span style={{color: '#fd79a8'}}> 점프버튼</span>: 점프 | 
+                  <span style={{color: '#fdcb6e'}}> 드래그</span>: 시점
+                </>
+              ) : (
+                <>
+                  <span style={{color: '#74b9ff'}}>WASD</span>: 이동 | 
+                  <span style={{color: '#fd79a8'}}> 스페이스</span>: 점프 | 
+                  <span style={{color: '#fdcb6e'}}> 마우스</span>: 시점 이동
+                </>
+              )}
+            </div>
           </div>
-          <div style={{ 
-            fontSize: isMobile ? '12px' : '14px', 
-            color: 'rgba(255, 255, 255, 0.8)',
-            lineHeight: '1.4'
-          }}>
-            {isMobile ? (
-              <>
-                <span style={{color: '#74b9ff'}}>가상패드</span>: 이동 | 
-                <span style={{color: '#fd79a8'}}> 점프버튼</span>: 점프 | 
-                <span style={{color: '#fdcb6e'}}> 드래그</span>: 시점
-              </>
-            ) : (
-              <>
-                <span style={{color: '#74b9ff'}}>WASD</span>: 이동 | 
-                <span style={{color: '#fd79a8'}}> 스페이스</span>: 점프 | 
-                <span style={{color: '#fdcb6e'}}> 마우스</span>: 시점 이동
-              </>
-            )}
-          </div>
-        </div>
+
+          {/* 모바일용 전체 화면 터치 영역 */}
+          {isMobile && (
+            <div
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                zIndex: 999,
+                cursor: 'pointer',
+                backgroundColor: 'transparent'
+              }}
+              onTouchStart={(e) => {
+                e.preventDefault()
+                const canvas = document.querySelector('canvas')
+                if (canvas) {
+                  canvas.requestPointerLock()
+                }
+              }}
+              onClick={() => {
+                const canvas = document.querySelector('canvas')
+                if (canvas) {
+                  canvas.requestPointerLock()
+                }
+              }}
+            />
+          )}
+        </>
       )}
 
       {/* 3D Canvas - 반응형 최적화 */}
@@ -297,6 +337,24 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           fov: isMobile ? 85 : 75, // 모바일에서 더 넓은 시야
           near: 0.1,
           far: isMobile ? 500 : 1000, // 모바일에서 렌더 거리 단축
+        }}
+        onCreated={({ gl }) => {
+          // 모바일에서 터치 이벤트 처리
+          if (isMobile) {
+            gl.domElement.addEventListener('touchstart', (e) => {
+              e.preventDefault()
+              if (!isLocked) {
+                gl.domElement.requestPointerLock()
+              }
+            })
+          }
+          
+          // 데스크톱에서 클릭 이벤트 처리  
+          gl.domElement.addEventListener('click', () => {
+            if (!isLocked) {
+              gl.domElement.requestPointerLock()
+            }
+          })
         }}
       >
         <Physics
@@ -399,6 +457,9 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             jumpPressed={isJumping}
           />
 
+          {/* 모바일 카메라 컨트롤 */}
+          <MobileCameraControls isMobile={isMobile} isLocked={isLocked} />
+
           {/* 환경 - 뜨겁고 오염된 분위기 */}
           <Environment preset="city" />
           
@@ -464,7 +525,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
           )}
         </>
       )}
-    </>
+    </div>
   )
 }
 

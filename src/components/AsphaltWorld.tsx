@@ -22,6 +22,10 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
   // 가상 조이스틱 상태
   const [joystickInput, setJoystickInput] = React.useState({ x: 0, y: 0 })
   const [isJumping, setIsJumping] = React.useState(false)
+  
+  // 교육 팝업 상태
+  const [showEducationPopup, setShowEducationPopup] = React.useState(true)
+  const [selectedTechnology, setSelectedTechnology] = React.useState<string | null>(null)
 
   // 기기 타입 감지
   React.useEffect(() => {
@@ -137,60 +141,364 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
         {isMobile ? '뒤로' : '지구로 돌아가기'}
       </button>
 
-      {/* 정보 패널 - 반응형 디자인 */}
-      <div 
-        className={isMobile ? 'info-panel-mobile' : isTablet ? 'info-panel-tablet' : ''}
+      {/* 정보 버튼 - 교육 팝업 다시 열기 */}
+      <button
+        onClick={() => setShowEducationPopup(true)}
         style={{
-        position: 'absolute',
-        top: isMobile ? 'calc(10px + env(safe-area-inset-top))' : '20px',
-        right: isMobile ? '10px' : '20px',
-        left: isMobile ? '10px' : 'auto',
-        background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(20, 20, 40, 0.6) 100%)',
-        color: 'white',
-        padding: isMobile ? '12px' : '18px',
-        borderRadius: '15px',
-        maxWidth: isMobile ? 'none' : isTablet ? '320px' : '280px',
-        zIndex: 1000,
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 69, 0, 0.3)',
-        boxShadow: '0 6px 24px rgba(255, 69, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-      }}>
-        <h3 style={{ 
-          margin: '0 0 12px 0', 
-          color: '#ff6b47',
-          fontSize: isMobile ? '14px' : '16px',
+          position: 'absolute',
+          top: isMobile ? 'calc(10px + env(safe-area-inset-top))' : '20px',
+          right: isMobile ? '10px' : '100px', // 뒤로가기 버튼 옆에 배치
+          zIndex: 1000,
+          padding: isMobile ? '8px 12px' : '10px 18px',
+          fontSize: isMobile ? '12px' : '14px',
           fontWeight: 'bold',
-          textShadow: '0 0 15px rgba(255, 107, 71, 0.6)',
-          letterSpacing: '0.5px'
-        }}>
-          열섬 현상
-        </h3>
-        <p style={{ 
-          margin: '0 0 12px 0', 
-          fontSize: isMobile ? '12px' : '13px',
-          lineHeight: '1.5',
-          color: 'rgba(255, 255, 255, 0.9)'
-        }}>
-          {isMobile 
-            ? '도시가 주변보다 뜨거워지는 현상입니다.'
-            : '도시 지역이 주변 농촌보다 높은 온도를 보이는 현상으로, 아스팔트, 콘크리트, 건물 등이 태양열을 흡수하여 발생합니다.'
+          color: '#ffffff',
+          background: 'linear-gradient(135deg, rgba(255, 107, 71, 0.3) 0%, rgba(255, 138, 80, 0.4) 100%)',
+          border: '2px solid rgba(255, 107, 71, 0.5)',
+          borderRadius: '40px',
+          cursor: 'pointer',
+          backdropFilter: 'blur(20px)',
+          boxShadow: '0 8px 32px rgba(255, 107, 71, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+          letterSpacing: '0.5px',
+          textShadow: '0 0 10px rgba(255, 107, 71, 0.5)',
+          minHeight: isMobile ? '44px' : 'auto', // 터치 친화적 크기
+        }}
+        onMouseEnter={(e) => {
+          if (!isMobile) {
+            e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)'
+            e.currentTarget.style.boxShadow = '0 12px 40px rgba(255, 107, 71, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 107, 71, 0.4) 0%, rgba(255, 138, 80, 0.5) 100%)'
           }
-        </p>
-        <div style={{ 
-          fontSize: isMobile ? '11px' : '12px', 
-          color: '#00ff88',
-          padding: '8px',
-          background: 'rgba(0, 255, 136, 0.1)',
-          borderRadius: '8px',
-          border: '1px solid rgba(0, 255, 136, 0.2)',
-          textShadow: '0 0 10px rgba(0, 255, 136, 0.3)'
-        }}>
-          {isMobile 
-            ? '해결책: 녹지, 쿨루프, 투수성 포장재'
-            : '해결책: 녹지 확대, 쿨루프, 투수성 포장재, 건물 외벽 녹화'
+        }}
+        onMouseLeave={(e) => {
+          if (!isMobile) {
+            e.currentTarget.style.transform = 'translateY(0) scale(1)'
+            e.currentTarget.style.boxShadow = '0 8px 32px rgba(255, 107, 71, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 107, 71, 0.3) 0%, rgba(255, 138, 80, 0.4) 100%)'
           }
+        }}
+      >
+        {isMobile ? '정보' : '열섬현상 정보'}
+      </button>
+
+      {/* 교육 팝업 - 열섬현상 설명 */}
+      {showEducationPopup && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0, 0, 0, 0.8)',
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: isMobile ? '20px' : '40px'
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(20, 20, 40, 0.95) 0%, rgba(40, 20, 20, 0.95) 100%)',
+            borderRadius: '20px',
+            padding: isMobile ? '20px' : '30px',
+            maxWidth: isMobile ? '100%' : '800px',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            backdropFilter: 'blur(20px)',
+            border: '2px solid rgba(255, 69, 0, 0.4)',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+            color: 'white'
+          }}>
+            {/* 제목 */}
+            <h1 style={{
+              fontSize: isMobile ? '24px' : '32px',
+              fontWeight: 'bold',
+              color: '#ff6b47',
+              textAlign: 'center',
+              margin: '0 0 20px 0',
+              textShadow: '0 0 20px rgba(255, 107, 71, 0.8)'
+            }}>
+              도시 열섬 현상
+            </h1>
+
+            {/* 현상 설명 */}
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              padding: isMobile ? '15px' : '20px',
+              borderRadius: '15px',
+              marginBottom: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
+            }}>
+              <h3 style={{ color: '#ffaa44', marginBottom: '10px', fontSize: isMobile ? '16px' : '18px' }}>
+                현상 정의
+              </h3>
+              <p style={{ 
+                lineHeight: '1.6', 
+                fontSize: isMobile ? '14px' : '16px',
+                color: 'rgba(255, 255, 255, 0.9)'
+              }}>
+                도시 열섬 현상은 <strong style={{color: '#ff6b47'}}>도시 지역이 주변 농촌보다 2-8°C 높은 온도</strong>를 보이는 현상입니다. 
+                아스팔트, 콘크리트, 건물 등이 태양열을 흡수하여 발생하며, 특히 여름 밤에 가장 두드러집니다.
+              </p>
+            </div>
+
+            {/* 원인 */}
+            <div style={{
+              background: 'rgba(255, 69, 0, 0.1)',
+              padding: isMobile ? '15px' : '20px',
+              borderRadius: '15px',
+              marginBottom: '20px',
+              border: '1px solid rgba(255, 69, 0, 0.3)'
+            }}>
+              <h3 style={{ color: '#ff6b47', marginBottom: '10px', fontSize: isMobile ? '16px' : '18px' }}>
+                주요 원인
+              </h3>
+              <ul style={{ 
+                paddingLeft: '20px', 
+                lineHeight: '1.6',
+                fontSize: isMobile ? '14px' : '16px',
+                color: 'rgba(255, 255, 255, 0.9)'
+              }}>
+                <li><strong>지표면 변화:</strong> 녹지가 아스팔트와 콘크리트로 대체</li>
+                <li><strong>건물 밀집:</strong> 빌딩들이 태양광 반사 면적 증가 (계곡 효과)</li>
+                <li><strong>녹지 부족:</strong> 증발산을 통한 자연 냉각 효과 감소</li>
+                <li><strong>인공 열 발생:</strong> 에어컨, 자동차, 공장 등의 열 방출</li>
+                <li><strong>대기 오염:</strong> 스모그가 열 순환을 방해</li>
+              </ul>
+            </div>
+
+            {/* 해결 기술들 */}
+            <div style={{
+              background: 'rgba(0, 255, 136, 0.1)',
+              padding: isMobile ? '15px' : '20px',
+              borderRadius: '15px',
+              marginBottom: '20px',
+              border: '1px solid rgba(0, 255, 136, 0.3)'
+            }}>
+              <h3 style={{ color: '#00ff88', marginBottom: '15px', fontSize: isMobile ? '16px' : '18px' }}>
+                혁신적인 해결 기술들
+              </h3>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                {/* 쿨루프 기술 - 개발중 */}
+                <div style={{
+                  background: 'rgba(100, 100, 100, 0.3)',
+                  padding: '15px',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(150, 150, 150, 0.3)',
+                  opacity: 0.6,
+                  position: 'relative'
+                }}>
+                  <h4 style={{ color: '#aaaaaa', marginBottom: '8px', fontSize: isMobile ? '14px' : '16px' }}>
+                    쿨루프 (Cool Roof) 🔒
+                  </h4>
+                  <p style={{ fontSize: isMobile ? '12px' : '14px', color: 'rgba(170, 170, 170, 0.8)', lineHeight: '1.4' }}>
+                    태양광의 75% 이상을 반사하는 특수 소재로 건물 온도를 크게 낮춤
+                  </p>
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    right: '15px',
+                    transform: 'translateY(-50%)',
+                    background: 'rgba(255, 200, 0, 0.8)',
+                    color: '#000',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    fontWeight: 'bold'
+                  }}>
+                    개발중
+                  </div>
+                </div>
+
+                {/* 투수성 포장재 - 체험 가능 */}
+                <div 
+                  onClick={() => setSelectedTechnology('permeable')}
+                  style={{
+                    background: selectedTechnology === 'permeable' 
+                      ? 'rgba(0, 255, 136, 0.2)' 
+                      : 'rgba(255, 255, 255, 0.05)',
+                    padding: '15px',
+                    borderRadius: '10px',
+                    border: selectedTechnology === 'permeable' 
+                      ? '2px solid rgba(0, 255, 136, 0.8)' 
+                      : '1px solid rgba(255, 255, 255, 0.1)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    position: 'relative'
+                  }}
+                >
+                  <h4 style={{ 
+                    color: selectedTechnology === 'permeable' ? '#00ff88' : '#88ddff', 
+                    marginBottom: '8px', 
+                    fontSize: isMobile ? '14px' : '16px' 
+                  }}>
+                    투수성 포장재 ⭐
+                  </h4>
+                  <p style={{ 
+                    fontSize: isMobile ? '12px' : '14px', 
+                    color: 'rgba(255, 255, 255, 0.9)', 
+                    lineHeight: '1.4',
+                    marginBottom: '8px'
+                  }}>
+                    다공성 구조로 빗물이 스며들어 지하수로 흐르며, 물의 증발로 자연 냉각 효과를 만드는 혁신적인 포장재입니다. 
+                    기존 아스팔트 대비 <strong style={{color: '#00ff88'}}>최대 10°C 낮은 표면온도</strong>를 유지하며, 
+                    도시 홍수 예방과 열섬현상 완화를 동시에 해결합니다.
+                  </p>
+                  <div style={{
+                    background: 'rgba(0, 255, 136, 0.2)',
+                    padding: '8px',
+                    borderRadius: '8px',
+                    fontSize: '11px',
+                    color: '#00ff88',
+                    fontWeight: 'bold'
+                  }}>
+                    💧 주요 효과: 표면온도 10°C 감소 | 빗물 흡수 90% | 증발냉각 효과
+                  </div>
+                  {selectedTechnology === 'permeable' && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      background: 'rgba(0, 255, 136, 0.8)',
+                      color: '#000',
+                      padding: '4px 8px',
+                      borderRadius: '12px',
+                      fontSize: '10px',
+                      fontWeight: 'bold'
+                    }}>
+                      선택됨
+                    </div>
+                  )}
+                </div>
+
+                {/* 수직 정원 - 개발중 */}
+                <div style={{
+                  background: 'rgba(100, 100, 100, 0.3)',
+                  padding: '15px',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(150, 150, 150, 0.3)',
+                  opacity: 0.6,
+                  position: 'relative'
+                }}>
+                  <h4 style={{ color: '#aaaaaa', marginBottom: '8px', fontSize: isMobile ? '14px' : '16px' }}>
+                    수직 정원 & 그린루프 🔒
+                  </h4>
+                  <p style={{ fontSize: isMobile ? '12px' : '14px', color: 'rgba(170, 170, 170, 0.8)', lineHeight: '1.4' }}>
+                    건물 벽면과 옥상 녹화로 자연 단열재 역할 및 공기 정화
+                  </p>
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    right: '15px',
+                    transform: 'translateY(-50%)',
+                    background: 'rgba(255, 200, 0, 0.8)',
+                    color: '#000',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    fontWeight: 'bold'
+                  }}>
+                    개발중
+                  </div>
+                </div>
+
+                {/* 스마트 냉각 시스템 - 개발중 */}
+                <div style={{
+                  background: 'rgba(100, 100, 100, 0.3)',
+                  padding: '15px',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(150, 150, 150, 0.3)',
+                  opacity: 0.6,
+                  position: 'relative'
+                }}>
+                  <h4 style={{ color: '#aaaaaa', marginBottom: '8px', fontSize: isMobile ? '14px' : '16px' }}>
+                    스마트 냉각 시스템 🔒
+                  </h4>
+                  <p style={{ fontSize: isMobile ? '12px' : '14px', color: 'rgba(170, 170, 170, 0.8)', lineHeight: '1.4' }}>
+                    AI 기반 물 분사, 지하수 활용한 자동 냉각 시스템
+                  </p>
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    right: '15px',
+                    transform: 'translateY(-50%)',
+                    background: 'rgba(255, 200, 0, 0.8)',
+                    color: '#000',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    fontWeight: 'bold'
+                  }}>
+                    개발중
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 탐험 시작 버튼 */}
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+              {selectedTechnology === 'permeable' ? (
+                <button
+                  onClick={() => setShowEducationPopup(false)}
+                  style={{
+                    background: 'linear-gradient(135deg, #00ff88 0%, #00cc66 100%)',
+                    color: '#000',
+                    border: 'none',
+                    padding: isMobile ? '15px 30px' : '18px 40px',
+                    borderRadius: '50px',
+                    fontSize: isMobile ? '16px' : '18px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    boxShadow: '0 8px 25px rgba(0, 255, 136, 0.4)',
+                    transition: 'all 0.3s ease',
+                    textShadow: '0 0 10px rgba(255, 255, 255, 0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isMobile) {
+                      e.currentTarget.style.transform = 'translateY(-2px) scale(1.05)'
+                      e.currentTarget.style.boxShadow = '0 12px 35px rgba(0, 255, 136, 0.6)'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isMobile) {
+                      e.currentTarget.style.transform = 'translateY(0) scale(1)'
+                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 255, 136, 0.4)'
+                    }
+                  }}
+                >
+                  투수성 포장재 체험 시작
+                </button>
+              ) : (
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    fontSize: isMobile ? '14px' : '16px',
+                    marginBottom: '10px'
+                  }}>
+                    체험할 기술을 선택해주세요
+                  </div>
+                  <button
+                    disabled
+                    style={{
+                      background: 'rgba(100, 100, 100, 0.5)',
+                      color: 'rgba(255, 255, 255, 0.4)',
+                      border: 'none',
+                      padding: isMobile ? '15px 30px' : '18px 40px',
+                      borderRadius: '50px',
+                      fontSize: isMobile ? '16px' : '18px',
+                      fontWeight: 'bold',
+                      cursor: 'not-allowed'
+                    }}
+                  >
+                    체험 시작
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 온도계 UI - 화면 왼쪽 가운데 */}
       <div style={{

@@ -112,6 +112,7 @@ export function VirtualJoystick({ onMove, size = 120, maxDistance = 50 }: Virtua
   return (
     <div
       ref={containerRef}
+      className="virtual-joystick"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -216,6 +217,7 @@ export function JumpButton({ onJump, size = 80 }: JumpButtonProps) {
 
   return (
     <div
+      className="jump-button"
       onTouchStart={handleStart}
       onTouchEnd={handleEnd}
       onMouseDown={handleStart}

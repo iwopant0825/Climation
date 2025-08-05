@@ -18,10 +18,21 @@ export function MobileCameraControls({
   const isDragging = useRef(false)
 
   useEffect(() => {
-    if (!isMobile || !gl.domElement) return
+    if (!isMobile) return
 
     const handleTouchStart = (event: TouchEvent) => {
       if (event.touches.length !== 1) return
+      
+      // 가상 조이스틱이나 버튼 영역은 제외
+      const target = event.target as HTMLElement
+      if (target && (
+        target.closest('.virtual-joystick') || 
+        target.closest('.jump-button') ||
+        target.closest('button') ||
+        target.closest('.back-button-mobile')
+      )) {
+        return
+      }
       
       event.preventDefault()
       const touch = event.touches[0]
@@ -34,6 +45,16 @@ export function MobileCameraControls({
     const handleTouchMove = (event: TouchEvent) => {
       if (!previousTouch.current || event.touches.length !== 1 || !isDragging.current) return
       
+      // 가상 조이스틱이나 버튼 영역은 제외
+      const target = event.target as HTMLElement
+      if (target && (
+        target.closest('.virtual-joystick') || 
+        target.closest('.jump-button') ||
+        target.closest('button')
+      )) {
+        return
+      }
+      
       event.preventDefault()
       const touch = event.touches[0]
       
@@ -41,7 +62,7 @@ export function MobileCameraControls({
       const deltaY = touch.clientY - previousTouch.current.y
       
       // 모바일 터치 감도 (더 민감하게)
-      const sensitivity = 0.008
+      const sensitivity = 0.012
       
       cameraRotation.current.y -= deltaX * sensitivity
       cameraRotation.current.x -= deltaY * sensitivity
@@ -62,7 +83,7 @@ export function MobileCameraControls({
       
       previousTouch.current = { x: touch.clientX, y: touch.clientY }
       
-      console.log('Camera rotation:', cameraRotation.current) // 디버그용
+      console.log('Camera moving - deltaX:', deltaX, 'deltaY:', deltaY, 'rotation:', cameraRotation.current) // 더 자세한 디버그
     }
 
     const handleTouchEnd = (event: TouchEvent) => {
@@ -71,19 +92,19 @@ export function MobileCameraControls({
       isDragging.current = false
     }
 
-    // 터치 이벤트 리스너 추가 (passive: false로 preventDefault 허용)
-    gl.domElement.addEventListener('touchstart', handleTouchStart, { passive: false })
-    gl.domElement.addEventListener('touchmove', handleTouchMove, { passive: false })
-    gl.domElement.addEventListener('touchend', handleTouchEnd, { passive: false })
-    gl.domElement.addEventListener('touchcancel', handleTouchEnd, { passive: false })
+    // 전체 문서에 터치 이벤트 리스너 추가 (Canvas 외부에서도 작동)
+    document.addEventListener('touchstart', handleTouchStart, { passive: false })
+    document.addEventListener('touchmove', handleTouchMove, { passive: false })
+    document.addEventListener('touchend', handleTouchEnd, { passive: false })
+    document.addEventListener('touchcancel', handleTouchEnd, { passive: false })
 
     return () => {
-      gl.domElement.removeEventListener('touchstart', handleTouchStart)
-      gl.domElement.removeEventListener('touchmove', handleTouchMove)
-      gl.domElement.removeEventListener('touchend', handleTouchEnd)
-      gl.domElement.removeEventListener('touchcancel', handleTouchEnd)
+      document.removeEventListener('touchstart', handleTouchStart)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
+      document.removeEventListener('touchcancel', handleTouchEnd)
     }
-  }, [isMobile, camera, gl.domElement, onCameraMove]) // isLocked 의존성 제거
+  }, [isMobile, camera, onCameraMove]) // gl.domElement 의존성 제거
 
   // 데스크톱용 마우스 조작
   useEffect(() => {

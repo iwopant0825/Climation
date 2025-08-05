@@ -50,7 +50,7 @@ export function Player({
     jump: false,
   })
 
-  // 포인터 락 상태만 감지 (카메라 조작은 MobileCameraControls에서 처리)
+  // 포인터 락 상태 감지 및 마우스 이벤트 처리
   useEffect(() => {
     const canvas = gl.domElement
     
@@ -58,12 +58,38 @@ export function Player({
       isLocked.current = document.pointerLockElement === canvas
     }
     
+    // 마우스 이동 이벤트 (데스크톱용)
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!isLocked.current || isMobile) return
+
+      const { movementX, movementY } = event
+      const mouseSensitivity = 0.002
+      
+      // 카메라 회전 업데이트
+      cameraRotation.current.y -= movementX * mouseSensitivity
+      cameraRotation.current.x -= movementY * mouseSensitivity
+      
+      // 수직 회전 제한 (위아래 90도)
+      cameraRotation.current.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraRotation.current.x))
+      
+      // 카메라에 회전 적용
+      camera.rotation.order = 'YXZ'
+      camera.rotation.y = cameraRotation.current.y
+      camera.rotation.x = cameraRotation.current.x
+    }
+    
     document.addEventListener('pointerlockchange', handlePointerLockChange)
+    if (!isMobile) {
+      document.addEventListener('mousemove', handleMouseMove)
+    }
     
     return () => {
       document.removeEventListener('pointerlockchange', handlePointerLockChange)
+      if (!isMobile) {
+        document.removeEventListener('mousemove', handleMouseMove)
+      }
     }
-  }, [gl])
+  }, [gl, camera, isMobile])
 
   // 키보드 이벤트 리스너
   useEffect(() => {

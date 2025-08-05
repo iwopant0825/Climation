@@ -55,18 +55,32 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
     }
   }, [])
 
-  // 포인터 락 상태 감지
+  // 포인터 락 상태 감지 및 모바일 터치 모드 처리
   React.useEffect(() => {
     const handlePointerLockChange = () => {
       setIsLocked(document.pointerLockElement !== null)
     }
     
+    // 모바일에서는 화면 터치 시 즉시 락 모드로 전환
+    const handleMobileTouch = () => {
+      if (isMobile && !isLocked) {
+        setIsLocked(true)
+      }
+    }
+    
     document.addEventListener('pointerlockchange', handlePointerLockChange)
+    
+    if (isMobile) {
+      document.addEventListener('touchstart', handleMobileTouch, { once: true })
+    }
     
     return () => {
       document.removeEventListener('pointerlockchange', handlePointerLockChange)
+      if (isMobile) {
+        document.removeEventListener('touchstart', handleMobileTouch)
+      }
     }
-  }, [])
+  }, [isMobile, isLocked])
 
   return (
     <div style={{
@@ -263,7 +277,7 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
               marginBottom: '12px',
               textShadow: '0 0 15px rgba(0, 255, 136, 0.8)'
             }}>
-              {isMobile ? '화면을 터치하여 1인칭 모드 진입' : '화면을 클릭하여 1인칭 모드로 진입하세요'}
+              {isMobile ? '🎮 화면 아무곳이나 터치하세요!' : '화면을 클릭하여 1인칭 모드로 진입하세요'}
             </div>
             <div style={{ 
               fontSize: isMobile ? '12px' : '14px', 
@@ -272,9 +286,9 @@ export function AsphaltWorld({ onBackToEarth }: AsphaltWorldProps) {
             }}>
               {isMobile ? (
                 <>
-                  <span style={{color: '#74b9ff'}}>가상패드</span>: 이동 | 
-                  <span style={{color: '#fd79a8'}}> 점프버튼</span>: 점프 | 
-                  <span style={{color: '#fdcb6e'}}> 드래그</span>: 시점
+                  <span style={{color: '#74b9ff'}}>👆 드래그</span>: 시점 조작<br/>
+                  <span style={{color: '#fd79a8'}}>🕹️ 가상패드</span>: 이동 | 
+                  <span style={{color: '#fdcb6e'}}> 🔘 버튼</span>: 점프
                 </>
               ) : (
                 <>
